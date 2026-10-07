@@ -16,7 +16,6 @@
   --sans: 'Inter Tight', system-ui, sans-serif;
   --px: 'Pixelify Sans', ui-monospace, monospace;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
-  --hand: 'Caveat', cursive;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
@@ -30,13 +29,11 @@ code, .mono { font-family: var(--mono); font-size: .86em; }
 .muted { color: var(--muted); }
 
 /* ---------- masthead ---------- */
-.topline { display: flex; align-items: center; gap: 14px; font: 600 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
-.topline i { flex: 1; height: 1.5px; background: var(--ink); }
-.headrow { position: relative; margin-top: 18px; }
-h1 { margin: 0; max-width: 1050px; font-weight: 900; font-size: clamp(40px, 6.4vw, 84px); line-height: .9; letter-spacing: -.045em; }
-h1 em { font-style: normal; color: var(--orange); position: relative; white-space: nowrap; }
-h1 em::after { content: ''; position: absolute; left: 2%; right: 6%; bottom: -.06em; height: .09em; background: var(--orange); border-radius: 99px; transform: rotate(-1.2deg); }
-.sub { max-width: 640px; margin: 26px 0 14px; font-size: 18px; line-height: 1.45; color: var(--ink-2); font-weight: 500; }
+.appbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding-bottom: 14px; border-bottom: 2px solid var(--ink); }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand .mark { width: 26px; height: 26px; flex: none; }
+.brand b { font: 700 22px/1 var(--px); letter-spacing: .02em; }
+.brand .meta { font: 500 12.5px/1.2 var(--mono); color: var(--muted); padding-left: 12px; border-left: 1.5px solid var(--line); }
 .badges { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .chip { font: 600 11.5px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 7px 10px; border: 1.5px solid var(--ink); border-radius: 99px; }
 .tape { display: inline-block; font: 700 11.5px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink);
@@ -45,7 +42,7 @@ h1 em::after { content: ''; position: absolute; left: 2%; right: 6%; bottom: -.0
 .tape.small { font-size: 10px; padding: 4px 8px; margin-right: 6px; vertical-align: 1px; }
 
 /* ---------- stage: office + rail ---------- */
-.stage { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 20px; margin-top: 26px; align-items: start; }
+.stage { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 20px; margin-top: 20px; align-items: start; }
 .stage-main { min-width: 0; }
 .scene { position: relative; container-type: inline-size; aspect-ratio: 320 / 200; border: 3px solid var(--ink); border-radius: 16px; overflow: hidden; background: #e8d9bb; box-shadow: 0 6px 0 var(--ink); }
 .scene svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -74,8 +71,8 @@ h1 em::after { content: ''; position: absolute; left: 2%; right: 6%; bottom: -.0
 .tape-roll { transform-box: fill-box; transform-origin: bottom; }
 .obj.hot .tape-roll { animation: tape .6s steps(3) infinite; }
 @keyframes tape { 50% { transform: scaleY(1.5); } }
-.hands.spin, .hands { transform-box: view-box; transform-origin: 77.5px 12.5px; }
-.hands.spin { animation: spin .5s linear infinite; }
+.clock-hands { transform-box: view-box; transform-origin: 77.5px 12.5px; }
+.clock-hands.spin { animation: spin .5s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .steam rect { animation: steam 1.6s steps(3) infinite; }
 .steam rect:nth-child(2) { animation-delay: .5s; }
@@ -210,7 +207,7 @@ h1 em::after { content: ''; position: absolute; left: 2%; right: 6%; bottom: -.0
 .v2 .tape { position: absolute; top: -12px; left: 12px; }
 .v2 p { margin: 4px 0; }
 .sticky { margin-top: 18px; background: #fbe8a6; padding: 14px 16px; transform: rotate(-.8deg); box-shadow: 0 6px 12px -6px rgba(0,0,0,.35); display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; }
-.sticky b { font: 700 22px/1 var(--hand); }
+.sticky b { font: 700 13px/1 var(--mono); text-transform: uppercase; letter-spacing: .07em; }
 
 /* quotes */
 .quotes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -314,7 +311,6 @@ footer { margin-top: 34px; padding-top: 16px; border-top: 1.5px solid var(--ink)
 }
 @media (max-width: 640px) {
   .wrap { padding: 16px 16px 32px; }
-  .sub { font-size: 16px; }
   .rail { grid-template-columns: 1fr; }
   .folder { padding: 16px; }
   .stages { grid-template-columns: 1fr; }

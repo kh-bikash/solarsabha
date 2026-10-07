@@ -127,12 +127,14 @@ export default function App() {
 
   return (
     <div className="wrap">
-      <header className="mast">
-        <div className="topline"><span>SolarSabha</span><i /><span>{r.society.name} · {r.society.flats} flats · {r.society.discom}</span></div>
-        <div className="headrow">
-          <h1>Solar projects die of <em>tiredness</em>, not bad maths.</h1>
+      <header className="appbar">
+        <div className="brand">
+          <svg className="mark" viewBox="0 0 8 8" shapeRendering="crispEdges" aria-hidden="true">
+            <rect x="2" y="1" width="4" height="4" fill="#ef6a1a" /><rect x="1" y="2" width="6" height="2" fill="#ef6a1a" /><rect x="0" y="6" width="8" height="2" fill="#2f6db5" />
+          </svg>
+          <b>SolarSabha</b>
+          <span className="meta">{r.society.name} · {r.society.flats} flats · {r.society.discom}</span>
         </div>
-        <p className="sub">SolarSabha is a patient project manager for your society’s committee. It reads the bills, sizes the roof, checks vendor quotes and keeps after the DISCOM for weeks. People approve every step.</p>
         <div className="badges">
           <span className="chip">{modeLabel}</span>
           {r.mode === 'offline' && <span className="chip">No AI model in this run</span>}

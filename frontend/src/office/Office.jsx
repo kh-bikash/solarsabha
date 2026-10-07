@@ -119,7 +119,7 @@ function Room({ night, dayShown, board, hotObj, phase }) {
 
       {/* clock and calendar */}
       <Sprite grid={P.CLOCK} pal={P.PAL_CLOCK} x={72} y={7} />
-      <g className={'hands' + (phase === 'night' ? ' spin' : '')}>
+      <g className={'clock-hands' + (phase === 'night' ? ' spin' : '')}>
         <rect x="77" y="9" width="1" height="4" fill="#c63a2b" />
         <rect x="77" y="12" width="3" height="1" fill="#2b2f36" />
       </g>
