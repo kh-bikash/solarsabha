@@ -1,0 +1,81 @@
+{
+  "_about": "The rulebook is the single source of truth for rules and constants. Agents and tools must read values from here and cite them. status: 'official' = taken from a government or regulator document. 'vendor-guide-verify' = from company guides, MUST be verified against the official scheme guidelines before the demo. 'team-assumption' = our own illustrative number.",
+  "rules": {
+    "subsidy_per_kw_ghs": {
+      "value": 18000, "unit": "INR per kW", "status": "official", "as_of": "2024-03",
+      "source": "MNRE / PM Surya Ghar subsidy structure sheet (CFA_structure20240307.pdf)",
+      "note": "For common facilities of Group Housing Societies / RWAs, including EV charging."
+    },
+    "cap_kw_per_flat": {
+      "value": 3, "unit": "kW per flat", "status": "official", "as_of": "2024-03",
+      "source": "MNRE / PM Surya Ghar subsidy structure sheet",
+      "note": "A CEILING, not a target. Size to the common-meter load."
+    },
+    "cap_total_kw_ghs": {
+      "value": 500, "unit": "kW", "status": "official", "as_of": "2024-03",
+      "source": "MNRE / PM Surya Ghar subsidy structure sheet",
+      "note": "Also counts any solar already installed by individual flat owners."
+    },
+    "grid_emission_factor": {
+      "value": 0.710, "unit": "tCO2 per MWh", "status": "official", "as_of": "FY2024-25",
+      "source": "Central Electricity Authority, CO2 Baseline Database User Guide v21.0",
+      "note": "Check for a newer CEA version before the final submission."
+    },
+    "yield_kwh_per_kw_year": {
+      "value": 1400, "unit": "kWh per kW per year", "status": "vendor-guide-verify", "as_of": "2026",
+      "source": "Company guides quote 1,400 to 1,800. We use the low end to stay conservative.",
+      "note": "Location dependent. Replace with a sourced city value if available."
+    },
+    "target_share_of_load": {
+      "value": 0.85, "unit": "fraction", "status": "team-assumption", "as_of": "2026-10",
+      "source": "Our design choice, to avoid oversizing.", "note": "Changeable by the committee."
+    },
+    "cost_per_kw": {
+      "value": 50000, "unit": "INR per kW", "status": "vendor-guide-verify", "as_of": "2026",
+      "source": "Company guides quote roughly 45,000 to 60,000 INR per kW.", "note": "Used only for illustration."
+    },
+    "price_band_per_kw": {
+      "value": {"low": 42000, "high": 58000}, "unit": "INR per kW", "status": "team-assumption", "as_of": "2026-10",
+      "source": "Derived from the guide range, widened slightly.", "note": "Outside the band is a flag, not a verdict."
+    },
+    "default_tariff_inr_per_kwh": {
+      "value": 7, "unit": "INR per kWh", "status": "team-assumption", "as_of": "2026-10",
+      "source": "Illustrative. Real value depends on state and tariff class; read it from the bill.", "note": ""
+    },
+    "advance_flag_pct": {
+      "value": 20, "unit": "percent", "status": "team-assumption", "as_of": "2026-10",
+      "source": "Our policy threshold for flagging a large advance payment.", "note": "Not a legal limit."
+    },
+    "min_service_years": {
+      "value": 3, "unit": "years", "status": "team-assumption", "as_of": "2026-10",
+      "source": "Our threshold for flagging a short service/maintenance period.", "note": ""
+    },
+    "sign_before_approval_warning": {
+      "value": "Signing with an installer or paying a large advance before DISCOM approval may put the subsidy at risk.",
+      "unit": "text", "status": "vendor-guide-verify", "as_of": "2026",
+      "source": "Several company guides. Verify in the official guidelines.", "note": "Show as a warning, never as law."
+    },
+    "empanelled_vendor_requirement": {
+      "value": "Use an installer from the official empanelled/registered vendor list; a non-listed installer may void the subsidy.",
+      "unit": "text", "status": "vendor-guide-verify", "as_of": "2026",
+      "source": "Company guides. Verify on the national portal.", "note": ""
+    },
+    "missed_inspection_rule": {
+      "value": "Guides say repeated missed DISCOM inspection appointments can lead to cancellation.",
+      "unit": "text", "status": "vendor-guide-verify", "as_of": "2026",
+      "source": "One company guide. Verify.", "note": ""
+    },
+    "stages": {
+      "value": [
+        {"key": "AGM", "label": "Society decision (AGM)", "min_days": 5, "max_days": 7},
+        {"key": "PORTAL", "label": "Apply on portal", "min_days": 1, "max_days": 2},
+        {"key": "FEASIBILITY", "label": "DISCOM feasibility", "min_days": 14, "max_days": 25},
+        {"key": "INSTALL", "label": "Installation", "min_days": 15, "max_days": 25},
+        {"key": "METER", "label": "Net meter + inspection", "min_days": 10, "max_days": 14},
+        {"key": "SUBSIDY", "label": "Subsidy paid", "min_days": 25, "max_days": 30}
+      ],
+      "unit": "days per stage", "status": "vendor-guide-verify", "as_of": "2026",
+      "source": "Vendor guides. Real timelines often run longer (IEEFA reported 45 to 120 days overall).", "note": "Used for chasing logic; not an official SLA."
+    }
+  }
+}

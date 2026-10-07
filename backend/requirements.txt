@@ -1,0 +1,3 @@
+# Runtime for the API Lambda (offline pipeline + state). boto3 is provided by Lambda but pinned loosely for local use.
+boto3>=1.34
+pydantic>=2.5

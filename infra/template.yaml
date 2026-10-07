@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SolarSabha backend (API + state). Deploy with `sam build && sam deploy --guided` from this folder.
+
+Parameters:
+  BedrockModelId:
+    Type: String
+    Default: ""
+    Description: Model or inference profile id enabled in your account (needed only for live agent mode).
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        STATE_BACKEND: dynamodb
+        TABLE_NAME: !Ref StateTable
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+
+Resources:
+  StateTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - {AttributeName: pk, AttributeType: S}
+        - {AttributeName: sk, AttributeType: S}
+      KeySchema:
+        - {AttributeName: pk, KeyType: HASH}
+        - {AttributeName: sk, KeyType: RANGE}
+
+  UploadsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: [PUT, GET]
+            AllowedOrigins: ['*']
+            AllowedHeaders: ['*']
+
+  Api:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins: ['*']
+        AllowHeaders: ['*']
+        AllowMethods: [GET, POST, OPTIONS]
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/
+      Handler: solarsabha.handlers.api.handler
+      Policies:
+        - DynamoDBCrudPolicy: {TableName: !Ref StateTable}
+      Events:
+        Any:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: '/{proxy+}', Method: ANY}
+        Root:
+          Type: HttpApi
+          Properties: {ApiId: !Ref Api, Path: '/projects', Method: ANY}
+
+  WakeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../backend/
+      Handler: solarsabha.handlers.wake.handler
+      Policies:
+        - DynamoDBCrudPolicy: {TableName: !Ref StateTable}
+
+  # EventBridge Scheduler needs a role that may invoke WakeFunction. Per-project schedules are created at run time
+  # (see docs/ARCHITECTURE.md, "How the agent waits").
+  SchedulerInvokeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: scheduler.amazonaws.com}
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: invoke-wake
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt WakeFunction.Arn
+
+Outputs:
+  ApiUrl:
+    Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com
+  TableName:
+    Value: !Ref StateTable
+  UploadsBucketName:
+    Value: !Ref UploadsBucket
+  SchedulerRoleArn:
+    Value: !GetAtt SchedulerInvokeRole.Arn

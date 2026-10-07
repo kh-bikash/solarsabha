@@ -1,0 +1,2195 @@
+{
+ "day0": {
+  "mode": "offline",
+  "simulated_parts": [
+   "vendor replies",
+   "DISCOM replies",
+   "clock"
+  ],
+  "society": {
+   "name": "Sunrise Apartments",
+   "flats": 50,
+   "city": "Demo City",
+   "discom": "Demo DISCOM"
+  },
+  "annual_kwh": 60000,
+  "bills": [
+   {
+    "month": "2025-10",
+    "units_kwh": 4800,
+    "amount_inr": 36000
+   },
+   {
+    "month": "2025-11",
+    "units_kwh": 4600,
+    "amount_inr": 34500
+   },
+   {
+    "month": "2025-12",
+    "units_kwh": 4500,
+    "amount_inr": 33800
+   },
+   {
+    "month": "2026-01",
+    "units_kwh": 4600,
+    "amount_inr": 34500
+   },
+   {
+    "month": "2026-02",
+    "units_kwh": 4700,
+    "amount_inr": 35200
+   },
+   {
+    "month": "2026-03",
+    "units_kwh": 5200,
+    "amount_inr": 39000
+   },
+   {
+    "month": "2026-04",
+    "units_kwh": 5600,
+    "amount_inr": 42000
+   },
+   {
+    "month": "2026-05",
+    "units_kwh": 5800,
+    "amount_inr": 43500
+   },
+   {
+    "month": "2026-06",
+    "units_kwh": 5400,
+    "amount_inr": 40500
+   },
+   {
+    "month": "2026-07",
+    "units_kwh": 5200,
+    "amount_inr": 39000
+   },
+   {
+    "month": "2026-08",
+    "units_kwh": 5300,
+    "amount_inr": 39800
+   },
+   {
+    "month": "2026-09",
+    "units_kwh": 4300,
+    "amount_inr": 32300,
+    "unclear": true
+   }
+  ],
+  "price_band": {
+   "low": 42000,
+   "high": 58000
+  },
+  "plan": {
+   "options": [
+    {
+     "label": "small",
+     "share_of_load": 0.6,
+     "kw": 26
+    },
+    {
+     "label": "recommended",
+     "share_of_load": 0.85,
+     "kw": 36
+    },
+    {
+     "label": "large",
+     "share_of_load": 1.0,
+     "kw": 43
+    }
+   ],
+   "recommended_kw": 36,
+   "subsidy_ceiling_kw": 150,
+   "yield_kwh_per_kw": 1400,
+   "annual_kwh": 60000
+  },
+  "money": {
+   "small": {
+    "kw": 26,
+    "total_cost": 1300000,
+    "subsidy": 468000,
+    "net_cost": 832000,
+    "generation_kwh_year": 36400,
+    "saving_per_year": 254800,
+    "payback_years": 3.3,
+    "co2_tonnes_year": 25.8,
+    "assumptions": {
+     "cost_per_kw": 50000,
+     "tariff": 7,
+     "yield_kwh_per_kw": 1400,
+     "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+    }
+   },
+   "recommended": {
+    "kw": 36,
+    "total_cost": 1800000,
+    "subsidy": 648000,
+    "net_cost": 1152000,
+    "generation_kwh_year": 50400,
+    "saving_per_year": 352800,
+    "payback_years": 3.3,
+    "co2_tonnes_year": 35.8,
+    "assumptions": {
+     "cost_per_kw": 50000,
+     "tariff": 7,
+     "yield_kwh_per_kw": 1400,
+     "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+    }
+   },
+   "large": {
+    "kw": 43,
+    "total_cost": 2150000,
+    "subsidy": 774000,
+    "net_cost": 1376000,
+    "generation_kwh_year": 60200,
+    "saving_per_year": 421400,
+    "payback_years": 3.3,
+    "co2_tonnes_year": 42.7,
+    "assumptions": {
+     "cost_per_kw": 50000,
+     "tariff": 7,
+     "yield_kwh_per_kw": 1400,
+     "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+    }
+   }
+  },
+  "recommended": {
+   "kw": 36,
+   "total_cost": 1800000,
+   "subsidy": 648000,
+   "net_cost": 1152000,
+   "generation_kwh_year": 50400,
+   "saving_per_year": 352800,
+   "payback_years": 3.3,
+   "co2_tonnes_year": 35.8,
+   "assumptions": {
+    "cost_per_kw": 50000,
+    "tariff": 7,
+    "yield_kwh_per_kw": 1400,
+    "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+   }
+  },
+  "plan_v2": null,
+  "audits": [
+   {
+    "vendor": "Vendor A Solar Pvt Ltd",
+    "price_per_kw": 48611,
+    "vendor_check": {
+     "vendor": "Vendor A Solar Pvt Ltd",
+     "found_in_list": true,
+     "label": "SAMPLE vendor list. Verify on the official portal."
+    },
+    "flags": [],
+    "verdict": "GREEN"
+   },
+   {
+    "vendor": "Vendor B Sun Traders",
+    "price_per_kw": 38889,
+    "vendor_check": {
+     "vendor": "Vendor B Sun Traders",
+     "found_in_list": false,
+     "label": "SAMPLE vendor list. Verify on the official portal."
+    },
+    "flags": [
+     {
+      "level": "amber",
+      "code": "PRICE_LOW",
+      "message": "Rs 38,889 per kW is below the usual band (Rs 42,000 to 58,000). Ask what is left out.",
+      "rule": "price_band_per_kw"
+     },
+     {
+      "level": "red",
+      "code": "VENDOR_NOT_VERIFIED",
+      "message": "Vendor not found in the approved list we loaded. A non-listed installer may void the subsidy. Ask for proof.",
+      "rule": "empanelled_vendor_requirement"
+     },
+     {
+      "level": "amber",
+      "code": "WARRANTY_MISSING",
+      "message": "Panel warranty not stated.",
+      "rule": null
+     },
+     {
+      "level": "amber",
+      "code": "SERVICE_MISSING",
+      "message": "Service/maintenance period not stated.",
+      "rule": null
+     },
+     {
+      "level": "red",
+      "code": "DOCUMENT_CONTAINS_INSTRUCTIONS",
+      "message": "The document contains text that tries to instruct an AI ('Ignore previous instructions'). It was ignored and treated as data.",
+      "rule": null
+     }
+    ],
+    "verdict": "RED"
+   },
+   {
+    "vendor": "Vendor C Energy LLP",
+    "price_per_kw": 52778,
+    "vendor_check": {
+     "vendor": "Vendor C Energy LLP",
+     "found_in_list": true,
+     "label": "SAMPLE vendor list. Verify on the official portal."
+    },
+    "flags": [
+     {
+      "level": "amber",
+      "code": "ADVANCE_HIGH",
+      "message": "Advance of 50% is above our 20% flag level.",
+      "rule": "advance_flag_pct"
+     },
+     {
+      "level": "amber",
+      "code": "PAY_BEFORE_APPROVAL",
+      "message": "Payment is asked before DISCOM approval.",
+      "rule": "sign_before_approval_warning"
+     },
+     {
+      "level": "amber",
+      "code": "PRESSURE",
+      "message": "The offer uses time pressure. Do not sign under pressure.",
+      "rule": null
+     },
+     {
+      "level": "amber",
+      "code": "SERVICE_SHORT",
+      "message": "Only 1 year(s) of service; our flag level is 3.",
+      "rule": "min_service_years"
+     }
+    ],
+    "verdict": "AMBER"
+   }
+  ],
+  "negotiations": [
+   {
+    "vendor": "Vendor A Solar Pvt Ltd",
+    "simulated": true,
+    "skipped": false,
+    "start_price": 1750000,
+    "final_price": 1642812,
+    "final_advance_pct": 5,
+    "rounds": [
+     {
+      "round": 1,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1627500,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,627,500 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 1,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1688750,
+      "advance_pct": 5,
+      "message": "Vendor offer: Rs 1,688,750, 5% advance."
+     },
+     {
+      "round": 2,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1627500,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,627,500 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 2,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1658125,
+      "advance_pct": 5,
+      "message": "Vendor offer: Rs 1,658,125, 5% advance."
+     },
+     {
+      "round": 3,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1627500,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,627,500 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 3,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1642812,
+      "advance_pct": 5,
+      "message": "Vendor offer: Rs 1,642,812, 5% advance."
+     }
+    ]
+   },
+   {
+    "vendor": "Vendor B Sun Traders",
+    "simulated": true,
+    "skipped": true,
+    "rounds": [
+     {
+      "round": 1,
+      "from": "committee",
+      "kind": "request_proof",
+      "price": null,
+      "message": "Before we discuss price, please share proof of empanelment. We will not negotiate until it is verified."
+     }
+    ]
+   },
+   {
+    "vendor": "Vendor C Energy LLP",
+    "simulated": true,
+    "skipped": false,
+    "start_price": 1900000,
+    "final_price": 1795728,
+    "final_advance_pct": 35,
+    "rounds": [
+     {
+      "round": 1,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1767000,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,767,000 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 1,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1846800,
+      "advance_pct": 45,
+      "message": "Vendor offer: Rs 1,846,800, 45% advance."
+     },
+     {
+      "round": 2,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1767000,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,767,000 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 2,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1814880,
+      "advance_pct": 40,
+      "message": "Vendor offer: Rs 1,814,880, 40% advance."
+     },
+     {
+      "round": 3,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1767000,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,767,000 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 3,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1795728,
+      "advance_pct": 35,
+      "message": "Vendor offer: Rs 1,795,728, 35% advance."
+     }
+    ]
+   }
+  ],
+  "fairness": {
+   "models": [
+    "equal",
+    "by_area"
+   ],
+   "flats": [
+    {
+     "flat": "A-101",
+     "area_sqft": 900,
+     "equal_cost": 23040,
+     "area_cost": 18296,
+     "equal_saving_year": 7056,
+     "area_saving_year": 5603
+    },
+    {
+     "flat": "A-102",
+     "area_sqft": 900,
+     "equal_cost": 23040,
+     "area_cost": 18296,
+     "equal_saving_year": 7056,
+     "area_saving_year": 5603
+    },
+    {
+     "flat": "A-201",
+     "area_sqft": 1100,
+     "equal_cost": 23040,
+     "area_cost": 22362,
+     "equal_saving_year": 7056,
+     "area_saving_year": 6848
+    },
+    {
+     "flat": "A-202",
+     "area_sqft": 1100,
+     "equal_cost": 23040,
+     "area_cost": 22362,
+     "equal_saving_year": 7056,
+     "area_saving_year": 6848
+    },
+    {
+     "flat": "B-101",
+     "area_sqft": 1400,
+     "equal_cost": 23040,
+     "area_cost": 28461,
+     "equal_saving_year": 7056,
+     "area_saving_year": 8716
+    },
+    {
+     "flat": "B-102",
+     "area_sqft": 1400,
+     "equal_cost": 23040,
+     "area_cost": 28461,
+     "equal_saving_year": 7056,
+     "area_saving_year": 8716
+    }
+   ],
+   "total_flats": 50,
+   "listed_flats": 6,
+   "note": "Choosing between these models is the committee's decision, not ours. Showing 6 of 50 flats. Total area is estimated from these flats' average; enter every flat's area for exact by-area figures."
+  },
+  "timeline": [
+   {
+    "key": "AGM",
+    "label": "Society decision (AGM)",
+    "min_days": 5,
+    "max_days": 7,
+    "status": "DONE",
+    "start_day": 0,
+    "done_day": 7
+   },
+   {
+    "key": "PORTAL",
+    "label": "Apply on portal",
+    "min_days": 1,
+    "max_days": 2,
+    "status": "DONE",
+    "start_day": 7,
+    "done_day": 9
+   },
+   {
+    "key": "FEASIBILITY",
+    "label": "DISCOM feasibility",
+    "min_days": 14,
+    "max_days": 25,
+    "status": "ACTIVE",
+    "start_day": 9,
+    "days_elapsed": -9,
+    "overdue_by": 0
+   },
+   {
+    "key": "INSTALL",
+    "label": "Installation",
+    "min_days": 15,
+    "max_days": 25,
+    "status": "WAITING"
+   },
+   {
+    "key": "METER",
+    "label": "Net meter + inspection",
+    "min_days": 10,
+    "max_days": 14,
+    "status": "WAITING"
+   },
+   {
+    "key": "SUBSIDY",
+    "label": "Subsidy paid",
+    "min_days": 25,
+    "max_days": 30,
+    "status": "WAITING"
+   }
+  ],
+  "next_action": {
+   "stage": "FEASIBILITY",
+   "label": "DISCOM feasibility",
+   "chase_level": 0,
+   "status": "ACTIVE",
+   "overdue_by": 0
+  },
+  "drafts": [
+   {
+    "id": "5b202ce0",
+    "kind": "agm_notice",
+    "to": "All members",
+    "subject": "Notice: General Body Meeting on rooftop solar (Sunrise Apartments)",
+    "body": "Dear members,\n\nA general body meeting of Sunrise Apartments will be held on [to be set by committee].\n\nAgenda: approve a 36 kW rooftop solar system for common facilities.\nEstimated net cost to the society after subsidy: Rs 1,152,000 (subsidy Rs 648,000). Estimated simple payback: about 3.3 years.\nThese are estimates from the committee's analysis tool and will be confirmed with vendor quotes and the DISCOM.\n\nSecretary",
+    "status": "DRAFT"
+   },
+   {
+    "id": "500067d3",
+    "kind": "agm_resolution",
+    "to": "Committee",
+    "subject": "Draft resolution",
+    "body": "RESOLVED that Sunrise Apartments approves, in principle, installation of a 36 kW rooftop solar plant for common facilities, with costs and savings shared on the 'equal' basis, subject to DISCOM approval and a verified installer. The committee is authorised to apply on the national portal and to sign only after required approvals.",
+    "status": "DRAFT"
+   },
+   {
+    "id": "d88d8a28",
+    "kind": "counter_offer",
+    "to": "Vendor A Solar Pvt Ltd",
+    "subject": "Our counter-proposal",
+    "body": "Dear Vendor A Solar Pvt Ltd,\n\nThank you for your quotation. We can proceed to the next stage at Rs 1,627,500 with 5% advance and 5 years of service. Payments will follow stage approvals. Please confirm.\n\nSecretary",
+    "status": "DRAFT"
+   },
+   {
+    "id": "ae69c2fa",
+    "kind": "proof_request",
+    "to": "Vendor B Sun Traders",
+    "subject": "Please share proof of empanelment",
+    "body": "Dear Vendor B Sun Traders,\n\nBefore we discuss price, please share proof that you are on the official empanelled installer list, with your registration details.\n\nSecretary",
+    "status": "DRAFT"
+   },
+   {
+    "id": "c88a103d",
+    "kind": "counter_offer",
+    "to": "Vendor C Energy LLP",
+    "subject": "Our counter-proposal",
+    "body": "Dear Vendor C Energy LLP,\n\nThank you for your quotation. We can proceed to the next stage at Rs 1,767,000 with 5% advance and 5 years of service. Payments will follow stage approvals. Please confirm.\n\nSecretary",
+    "status": "DRAFT"
+   }
+  ],
+  "trace": [
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": null,
+    "input": null,
+    "output": "New project for Sunrise Apartments (50 flats). Starting with the bills."
+   },
+   {
+    "t": 0.0,
+    "agent": "Reader",
+    "tool": "sum_bills",
+    "input": "{'bills': [{'month': '2025-10', 'units_kwh': 4800, 'amount_inr': 36000}, {'month': '2025-11', 'units_kwh': 4600, 'amount_inr': 34500}, {'month': '2025-12', 'units_kwh': 4500, 'amount_inr': 33800}, {'month': '2026-01',...",
+    "output": "60000"
+   },
+   {
+    "t": 0.0,
+    "agent": "Reader",
+    "tool": null,
+    "input": null,
+    "output": "Unclear values in: 2026-09. Asking the committee to confirm."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "size_system",
+    "input": "{'annual_kwh': 60000, 'flats': 50}",
+    "output": "{'options': [{'label': 'small', 'share_of_load': 0.6, 'kw': 26}, {'label': 'recommended', 'share_of_load': 0.85, 'kw': 36}, {'label': 'large', 'share_of_load': 1.0, 'kw': 43}], 'recommended_kw': 36, 'subsidy_ceiling_k..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "money_summary",
+    "input": "{'kw': 26}",
+    "output": "{'kw': 26, 'total_cost': 1300000, 'subsidy': 468000, 'net_cost': 832000, 'generation_kwh_year': 36400, 'saving_per_year': 254800, 'payback_years': 3.3, 'co2_tonnes_year': 25.8, 'assumptions': {'cost_per_kw': 50000, 't..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "money_summary",
+    "input": "{'kw': 36}",
+    "output": "{'kw': 36, 'total_cost': 1800000, 'subsidy': 648000, 'net_cost': 1152000, 'generation_kwh_year': 50400, 'saving_per_year': 352800, 'payback_years': 3.3, 'co2_tonnes_year': 35.8, 'assumptions': {'cost_per_kw': 50000, '..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "money_summary",
+    "input": "{'kw': 43}",
+    "output": "{'kw': 43, 'total_cost': 2150000, 'subsidy': 774000, 'net_cost': 1376000, 'generation_kwh_year': 60200, 'saving_per_year': 421400, 'payback_years': 3.3, 'co2_tonnes_year': 42.7, 'assumptions': {'cost_per_kw': 50000, '..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": "audit_quote",
+    "input": "{'q': {'vendor': 'Vendor A Solar Pvt Ltd', 'capacity_kw': 36, 'total_price_inr': 1750000, 'advance_pct': 10, 'warranty_panel_years': 25, 'service_years': 5, 'payment_terms_text': '10% advance, 60% on delivery, 30% aft...",
+    "output": "{'vendor': 'Vendor A Solar Pvt Ltd', 'price_per_kw': 48611, 'vendor_check': {'vendor': 'Vendor A Solar Pvt Ltd', 'found_in_list': True, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [], 'ver..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": null,
+    "input": null,
+    "output": "Vendor A Solar Pvt Ltd: GREEN (0 flag(s))"
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": "audit_quote",
+    "input": "{'q': {'vendor': 'Vendor B Sun Traders', 'capacity_kw': 36, 'total_price_inr': 1400000, 'advance_pct': 20, 'warranty_panel_years': None, 'service_years': None, 'payment_terms_text': '20% advance on signing.', 'offer_t...",
+    "output": "{'vendor': 'Vendor B Sun Traders', 'price_per_kw': 38889, 'vendor_check': {'vendor': 'Vendor B Sun Traders', 'found_in_list': False, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [{'level': ..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": null,
+    "input": null,
+    "output": "Vendor B Sun Traders: RED (5 flag(s))"
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": "audit_quote",
+    "input": "{'q': {'vendor': 'Vendor C Energy LLP', 'capacity_kw': 36, 'total_price_inr': 1900000, 'advance_pct': 50, 'warranty_panel_years': 25, 'service_years': 1, 'payment_terms_text': '50% advance before DISCOM approval.', 'o...",
+    "output": "{'vendor': 'Vendor C Energy LLP', 'price_per_kw': 52778, 'vendor_check': {'vendor': 'Vendor C Energy LLP', 'found_in_list': True, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [{'level': 'am..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": null,
+    "input": null,
+    "output": "Vendor C Energy LLP: AMBER (4 flag(s))"
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "run_simulated_negotiation",
+    "input": "{'quote': {'vendor': 'Vendor A Solar Pvt Ltd', 'capacity_kw': 36, 'total_price_inr': 1750000, 'advance_pct': 10, 'warranty_panel_years': 25, 'service_years': 5, 'payment_terms_text': '10% advance, 60% on delivery, 30%...",
+    "output": "{'vendor': 'Vendor A Solar Pvt Ltd', 'simulated': True, 'skipped': False, 'start_price': 1750000, 'final_price': 1642812, 'final_advance_pct': 5, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'counter', 'price'..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "run_simulated_negotiation",
+    "input": "{'quote': {'vendor': 'Vendor B Sun Traders', 'capacity_kw': 36, 'total_price_inr': 1400000, 'advance_pct': 20, 'warranty_panel_years': None, 'service_years': None, 'payment_terms_text': '20% advance on signing.', 'off...",
+    "output": "{'vendor': 'Vendor B Sun Traders', 'simulated': True, 'skipped': True, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'request_proof', 'price': None, 'message': 'Before we discuss price, please share proof of em..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "run_simulated_negotiation",
+    "input": "{'quote': {'vendor': 'Vendor C Energy LLP', 'capacity_kw': 36, 'total_price_inr': 1900000, 'advance_pct': 50, 'warranty_panel_years': 25, 'service_years': 1, 'payment_terms_text': '50% advance before DISCOM approval.'...",
+    "output": "{'vendor': 'Vendor C Energy LLP', 'simulated': True, 'skipped': False, 'start_price': 1900000, 'final_price': 1795728, 'final_advance_pct': 35, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'counter', 'price': ..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "fairness_table",
+    "input": "{'net_cost': 1152000, 'saving_per_year': 352800, 'flat_areas_sqft': {'A-101': 900, 'A-102': 900, 'A-201': 1100, 'A-202': 1100, 'B-101': 1400, 'B-102': 1400}, 'total_flats': 50}",
+    "output": "{'models': ['equal', 'by_area'], 'flats': [{'flat': 'A-101', 'area_sqft': 900, 'equal_cost': 23040, 'area_cost': 18296, 'equal_saving_year': 7056, 'area_saving_year': 5603}, {'flat': 'A-102', 'area_sqft': 900, 'equal_..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Chaser",
+    "tool": "build_timeline",
+    "input": "{'events': [{'stage': 'AGM', 'done_day': 7}, {'stage': 'PORTAL', 'done_day': 9}], 'today_day': 0}",
+    "output": "[{'key': 'AGM', 'label': 'Society decision (AGM)', 'min_days': 5, 'max_days': 7, 'status': 'DONE', 'start_day': 0, 'done_day': 7}, {'key': 'PORTAL', 'label': 'Apply on portal', 'min_days': 1, 'max_days': 2, 'status': ..."
+   },
+   {
+    "t": 0.002,
+    "agent": "Secretary",
+    "tool": null,
+    "input": null,
+    "output": "Drafted 5 papers for the committee: AGM notice, resolution and vendor letters. Nothing is sent."
+   }
+  ],
+  "today_day": 0,
+  "rules_used": [
+   "subsidy_per_kw_ghs",
+   "cap_kw_per_flat",
+   "cap_total_kw_ghs",
+   "grid_emission_factor",
+   "yield_kwh_per_kw_year",
+   "target_share_of_load",
+   "cost_per_kw",
+   "price_band_per_kw",
+   "default_tariff_inr_per_kwh",
+   "advance_flag_pct",
+   "min_service_years",
+   "sign_before_approval_warning",
+   "empanelled_vendor_requirement",
+   "missed_inspection_rule"
+  ]
+ },
+ "day50": {
+  "mode": "offline",
+  "simulated_parts": [
+   "vendor replies",
+   "DISCOM replies",
+   "clock"
+  ],
+  "society": {
+   "name": "Sunrise Apartments",
+   "flats": 50,
+   "city": "Demo City",
+   "discom": "Demo DISCOM"
+  },
+  "annual_kwh": 60000,
+  "bills": [
+   {
+    "month": "2025-10",
+    "units_kwh": 4800,
+    "amount_inr": 36000
+   },
+   {
+    "month": "2025-11",
+    "units_kwh": 4600,
+    "amount_inr": 34500
+   },
+   {
+    "month": "2025-12",
+    "units_kwh": 4500,
+    "amount_inr": 33800
+   },
+   {
+    "month": "2026-01",
+    "units_kwh": 4600,
+    "amount_inr": 34500
+   },
+   {
+    "month": "2026-02",
+    "units_kwh": 4700,
+    "amount_inr": 35200
+   },
+   {
+    "month": "2026-03",
+    "units_kwh": 5200,
+    "amount_inr": 39000
+   },
+   {
+    "month": "2026-04",
+    "units_kwh": 5600,
+    "amount_inr": 42000
+   },
+   {
+    "month": "2026-05",
+    "units_kwh": 5800,
+    "amount_inr": 43500
+   },
+   {
+    "month": "2026-06",
+    "units_kwh": 5400,
+    "amount_inr": 40500
+   },
+   {
+    "month": "2026-07",
+    "units_kwh": 5200,
+    "amount_inr": 39000
+   },
+   {
+    "month": "2026-08",
+    "units_kwh": 5300,
+    "amount_inr": 39800
+   },
+   {
+    "month": "2026-09",
+    "units_kwh": 4300,
+    "amount_inr": 32300,
+    "unclear": true
+   }
+  ],
+  "price_band": {
+   "low": 42000,
+   "high": 58000
+  },
+  "plan": {
+   "options": [
+    {
+     "label": "small",
+     "share_of_load": 0.6,
+     "kw": 26
+    },
+    {
+     "label": "recommended",
+     "share_of_load": 0.85,
+     "kw": 36
+    },
+    {
+     "label": "large",
+     "share_of_load": 1.0,
+     "kw": 43
+    }
+   ],
+   "recommended_kw": 36,
+   "subsidy_ceiling_kw": 150,
+   "yield_kwh_per_kw": 1400,
+   "annual_kwh": 60000
+  },
+  "money": {
+   "small": {
+    "kw": 26,
+    "total_cost": 1300000,
+    "subsidy": 468000,
+    "net_cost": 832000,
+    "generation_kwh_year": 36400,
+    "saving_per_year": 254800,
+    "payback_years": 3.3,
+    "co2_tonnes_year": 25.8,
+    "assumptions": {
+     "cost_per_kw": 50000,
+     "tariff": 7,
+     "yield_kwh_per_kw": 1400,
+     "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+    }
+   },
+   "recommended": {
+    "kw": 36,
+    "total_cost": 1800000,
+    "subsidy": 648000,
+    "net_cost": 1152000,
+    "generation_kwh_year": 50400,
+    "saving_per_year": 352800,
+    "payback_years": 3.3,
+    "co2_tonnes_year": 35.8,
+    "assumptions": {
+     "cost_per_kw": 50000,
+     "tariff": 7,
+     "yield_kwh_per_kw": 1400,
+     "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+    }
+   },
+   "large": {
+    "kw": 43,
+    "total_cost": 2150000,
+    "subsidy": 774000,
+    "net_cost": 1376000,
+    "generation_kwh_year": 60200,
+    "saving_per_year": 421400,
+    "payback_years": 3.3,
+    "co2_tonnes_year": 42.7,
+    "assumptions": {
+     "cost_per_kw": 50000,
+     "tariff": 7,
+     "yield_kwh_per_kw": 1400,
+     "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+    }
+   }
+  },
+  "recommended": {
+   "kw": 36,
+   "total_cost": 1800000,
+   "subsidy": 648000,
+   "net_cost": 1152000,
+   "generation_kwh_year": 50400,
+   "saving_per_year": 352800,
+   "payback_years": 3.3,
+   "co2_tonnes_year": 35.8,
+   "assumptions": {
+    "cost_per_kw": 50000,
+    "tariff": 7,
+    "yield_kwh_per_kw": 1400,
+    "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+   }
+  },
+  "plan_v2": null,
+  "audits": [
+   {
+    "vendor": "Vendor A Solar Pvt Ltd",
+    "price_per_kw": 48611,
+    "vendor_check": {
+     "vendor": "Vendor A Solar Pvt Ltd",
+     "found_in_list": true,
+     "label": "SAMPLE vendor list. Verify on the official portal."
+    },
+    "flags": [],
+    "verdict": "GREEN"
+   },
+   {
+    "vendor": "Vendor B Sun Traders",
+    "price_per_kw": 38889,
+    "vendor_check": {
+     "vendor": "Vendor B Sun Traders",
+     "found_in_list": false,
+     "label": "SAMPLE vendor list. Verify on the official portal."
+    },
+    "flags": [
+     {
+      "level": "amber",
+      "code": "PRICE_LOW",
+      "message": "Rs 38,889 per kW is below the usual band (Rs 42,000 to 58,000). Ask what is left out.",
+      "rule": "price_band_per_kw"
+     },
+     {
+      "level": "red",
+      "code": "VENDOR_NOT_VERIFIED",
+      "message": "Vendor not found in the approved list we loaded. A non-listed installer may void the subsidy. Ask for proof.",
+      "rule": "empanelled_vendor_requirement"
+     },
+     {
+      "level": "amber",
+      "code": "WARRANTY_MISSING",
+      "message": "Panel warranty not stated.",
+      "rule": null
+     },
+     {
+      "level": "amber",
+      "code": "SERVICE_MISSING",
+      "message": "Service/maintenance period not stated.",
+      "rule": null
+     },
+     {
+      "level": "red",
+      "code": "DOCUMENT_CONTAINS_INSTRUCTIONS",
+      "message": "The document contains text that tries to instruct an AI ('Ignore previous instructions'). It was ignored and treated as data.",
+      "rule": null
+     }
+    ],
+    "verdict": "RED"
+   },
+   {
+    "vendor": "Vendor C Energy LLP",
+    "price_per_kw": 52778,
+    "vendor_check": {
+     "vendor": "Vendor C Energy LLP",
+     "found_in_list": true,
+     "label": "SAMPLE vendor list. Verify on the official portal."
+    },
+    "flags": [
+     {
+      "level": "amber",
+      "code": "ADVANCE_HIGH",
+      "message": "Advance of 50% is above our 20% flag level.",
+      "rule": "advance_flag_pct"
+     },
+     {
+      "level": "amber",
+      "code": "PAY_BEFORE_APPROVAL",
+      "message": "Payment is asked before DISCOM approval.",
+      "rule": "sign_before_approval_warning"
+     },
+     {
+      "level": "amber",
+      "code": "PRESSURE",
+      "message": "The offer uses time pressure. Do not sign under pressure.",
+      "rule": null
+     },
+     {
+      "level": "amber",
+      "code": "SERVICE_SHORT",
+      "message": "Only 1 year(s) of service; our flag level is 3.",
+      "rule": "min_service_years"
+     }
+    ],
+    "verdict": "AMBER"
+   }
+  ],
+  "negotiations": [
+   {
+    "vendor": "Vendor A Solar Pvt Ltd",
+    "simulated": true,
+    "skipped": false,
+    "start_price": 1750000,
+    "final_price": 1642812,
+    "final_advance_pct": 5,
+    "rounds": [
+     {
+      "round": 1,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1627500,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,627,500 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 1,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1688750,
+      "advance_pct": 5,
+      "message": "Vendor offer: Rs 1,688,750, 5% advance."
+     },
+     {
+      "round": 2,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1627500,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,627,500 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 2,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1658125,
+      "advance_pct": 5,
+      "message": "Vendor offer: Rs 1,658,125, 5% advance."
+     },
+     {
+      "round": 3,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1627500,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,627,500 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 3,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1642812,
+      "advance_pct": 5,
+      "message": "Vendor offer: Rs 1,642,812, 5% advance."
+     }
+    ]
+   },
+   {
+    "vendor": "Vendor B Sun Traders",
+    "simulated": true,
+    "skipped": true,
+    "rounds": [
+     {
+      "round": 1,
+      "from": "committee",
+      "kind": "request_proof",
+      "price": null,
+      "message": "Before we discuss price, please share proof of empanelment. We will not negotiate until it is verified."
+     }
+    ]
+   },
+   {
+    "vendor": "Vendor C Energy LLP",
+    "simulated": true,
+    "skipped": false,
+    "start_price": 1900000,
+    "final_price": 1795728,
+    "final_advance_pct": 35,
+    "rounds": [
+     {
+      "round": 1,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1767000,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,767,000 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 1,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1846800,
+      "advance_pct": 45,
+      "message": "Vendor offer: Rs 1,846,800, 45% advance."
+     },
+     {
+      "round": 2,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1767000,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,767,000 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 2,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1814880,
+      "advance_pct": 40,
+      "message": "Vendor offer: Rs 1,814,880, 40% advance."
+     },
+     {
+      "round": 3,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1767000,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,767,000 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 3,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1795728,
+      "advance_pct": 35,
+      "message": "Vendor offer: Rs 1,795,728, 35% advance."
+     }
+    ]
+   }
+  ],
+  "fairness": {
+   "models": [
+    "equal",
+    "by_area"
+   ],
+   "flats": [
+    {
+     "flat": "A-101",
+     "area_sqft": 900,
+     "equal_cost": 23040,
+     "area_cost": 18296,
+     "equal_saving_year": 7056,
+     "area_saving_year": 5603
+    },
+    {
+     "flat": "A-102",
+     "area_sqft": 900,
+     "equal_cost": 23040,
+     "area_cost": 18296,
+     "equal_saving_year": 7056,
+     "area_saving_year": 5603
+    },
+    {
+     "flat": "A-201",
+     "area_sqft": 1100,
+     "equal_cost": 23040,
+     "area_cost": 22362,
+     "equal_saving_year": 7056,
+     "area_saving_year": 6848
+    },
+    {
+     "flat": "A-202",
+     "area_sqft": 1100,
+     "equal_cost": 23040,
+     "area_cost": 22362,
+     "equal_saving_year": 7056,
+     "area_saving_year": 6848
+    },
+    {
+     "flat": "B-101",
+     "area_sqft": 1400,
+     "equal_cost": 23040,
+     "area_cost": 28461,
+     "equal_saving_year": 7056,
+     "area_saving_year": 8716
+    },
+    {
+     "flat": "B-102",
+     "area_sqft": 1400,
+     "equal_cost": 23040,
+     "area_cost": 28461,
+     "equal_saving_year": 7056,
+     "area_saving_year": 8716
+    }
+   ],
+   "total_flats": 50,
+   "listed_flats": 6,
+   "note": "Choosing between these models is the committee's decision, not ours. Showing 6 of 50 flats. Total area is estimated from these flats' average; enter every flat's area for exact by-area figures."
+  },
+  "timeline": [
+   {
+    "key": "AGM",
+    "label": "Society decision (AGM)",
+    "min_days": 5,
+    "max_days": 7,
+    "status": "DONE",
+    "start_day": 0,
+    "done_day": 7
+   },
+   {
+    "key": "PORTAL",
+    "label": "Apply on portal",
+    "min_days": 1,
+    "max_days": 2,
+    "status": "DONE",
+    "start_day": 7,
+    "done_day": 9
+   },
+   {
+    "key": "FEASIBILITY",
+    "label": "DISCOM feasibility",
+    "min_days": 14,
+    "max_days": 25,
+    "status": "OVERDUE",
+    "start_day": 9,
+    "days_elapsed": 41,
+    "overdue_by": 16
+   },
+   {
+    "key": "INSTALL",
+    "label": "Installation",
+    "min_days": 15,
+    "max_days": 25,
+    "status": "WAITING"
+   },
+   {
+    "key": "METER",
+    "label": "Net meter + inspection",
+    "min_days": 10,
+    "max_days": 14,
+    "status": "WAITING"
+   },
+   {
+    "key": "SUBSIDY",
+    "label": "Subsidy paid",
+    "min_days": 25,
+    "max_days": 30,
+    "status": "WAITING"
+   }
+  ],
+  "next_action": {
+   "stage": "FEASIBILITY",
+   "label": "DISCOM feasibility",
+   "chase_level": 2,
+   "status": "OVERDUE",
+   "overdue_by": 16
+  },
+  "drafts": [
+   {
+    "id": "a4f819db",
+    "kind": "agm_notice",
+    "to": "All members",
+    "subject": "Notice: General Body Meeting on rooftop solar (Sunrise Apartments)",
+    "body": "Dear members,\n\nA general body meeting of Sunrise Apartments will be held on [to be set by committee].\n\nAgenda: approve a 36 kW rooftop solar system for common facilities.\nEstimated net cost to the society after subsidy: Rs 1,152,000 (subsidy Rs 648,000). Estimated simple payback: about 3.3 years.\nThese are estimates from the committee's analysis tool and will be confirmed with vendor quotes and the DISCOM.\n\nSecretary",
+    "status": "DRAFT"
+   },
+   {
+    "id": "0339e608",
+    "kind": "agm_resolution",
+    "to": "Committee",
+    "subject": "Draft resolution",
+    "body": "RESOLVED that Sunrise Apartments approves, in principle, installation of a 36 kW rooftop solar plant for common facilities, with costs and savings shared on the 'equal' basis, subject to DISCOM approval and a verified installer. The committee is authorised to apply on the national portal and to sign only after required approvals.",
+    "status": "DRAFT"
+   },
+   {
+    "id": "31c89421",
+    "kind": "counter_offer",
+    "to": "Vendor A Solar Pvt Ltd",
+    "subject": "Our counter-proposal",
+    "body": "Dear Vendor A Solar Pvt Ltd,\n\nThank you for your quotation. We can proceed to the next stage at Rs 1,627,500 with 5% advance and 5 years of service. Payments will follow stage approvals. Please confirm.\n\nSecretary",
+    "status": "DRAFT"
+   },
+   {
+    "id": "734d4e3b",
+    "kind": "proof_request",
+    "to": "Vendor B Sun Traders",
+    "subject": "Please share proof of empanelment",
+    "body": "Dear Vendor B Sun Traders,\n\nBefore we discuss price, please share proof that you are on the official empanelled installer list, with your registration details.\n\nSecretary",
+    "status": "DRAFT"
+   },
+   {
+    "id": "c3bb120a",
+    "kind": "counter_offer",
+    "to": "Vendor C Energy LLP",
+    "subject": "Our counter-proposal",
+    "body": "Dear Vendor C Energy LLP,\n\nThank you for your quotation. We can proceed to the next stage at Rs 1,767,000 with 5% advance and 5 years of service. Payments will follow stage approvals. Please confirm.\n\nSecretary",
+    "status": "DRAFT"
+   },
+   {
+    "id": "b05b7fce",
+    "kind": "discom_escalation",
+    "to": "Grievance cell",
+    "subject": "Escalation: delay on application [ref]",
+    "body": "We wrote earlier about application [ref]. It remains at 'DISCOM feasibility' for 16 days past the expected time. We request an update and a date by which the stage will be completed.\n\nSecretary",
+    "status": "DRAFT"
+   }
+  ],
+  "trace": [
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": null,
+    "input": null,
+    "output": "New project for Sunrise Apartments (50 flats). Starting with the bills."
+   },
+   {
+    "t": 0.0,
+    "agent": "Reader",
+    "tool": "sum_bills",
+    "input": "{'bills': [{'month': '2025-10', 'units_kwh': 4800, 'amount_inr': 36000}, {'month': '2025-11', 'units_kwh': 4600, 'amount_inr': 34500}, {'month': '2025-12', 'units_kwh': 4500, 'amount_inr': 33800}, {'month': '2026-01',...",
+    "output": "60000"
+   },
+   {
+    "t": 0.0,
+    "agent": "Reader",
+    "tool": null,
+    "input": null,
+    "output": "Unclear values in: 2026-09. Asking the committee to confirm."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "size_system",
+    "input": "{'annual_kwh': 60000, 'flats': 50}",
+    "output": "{'options': [{'label': 'small', 'share_of_load': 0.6, 'kw': 26}, {'label': 'recommended', 'share_of_load': 0.85, 'kw': 36}, {'label': 'large', 'share_of_load': 1.0, 'kw': 43}], 'recommended_kw': 36, 'subsidy_ceiling_k..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "money_summary",
+    "input": "{'kw': 26}",
+    "output": "{'kw': 26, 'total_cost': 1300000, 'subsidy': 468000, 'net_cost': 832000, 'generation_kwh_year': 36400, 'saving_per_year': 254800, 'payback_years': 3.3, 'co2_tonnes_year': 25.8, 'assumptions': {'cost_per_kw': 50000, 't..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "money_summary",
+    "input": "{'kw': 36}",
+    "output": "{'kw': 36, 'total_cost': 1800000, 'subsidy': 648000, 'net_cost': 1152000, 'generation_kwh_year': 50400, 'saving_per_year': 352800, 'payback_years': 3.3, 'co2_tonnes_year': 35.8, 'assumptions': {'cost_per_kw': 50000, '..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "money_summary",
+    "input": "{'kw': 43}",
+    "output": "{'kw': 43, 'total_cost': 2150000, 'subsidy': 774000, 'net_cost': 1376000, 'generation_kwh_year': 60200, 'saving_per_year': 421400, 'payback_years': 3.3, 'co2_tonnes_year': 42.7, 'assumptions': {'cost_per_kw': 50000, '..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": "audit_quote",
+    "input": "{'q': {'vendor': 'Vendor A Solar Pvt Ltd', 'capacity_kw': 36, 'total_price_inr': 1750000, 'advance_pct': 10, 'warranty_panel_years': 25, 'service_years': 5, 'payment_terms_text': '10% advance, 60% on delivery, 30% aft...",
+    "output": "{'vendor': 'Vendor A Solar Pvt Ltd', 'price_per_kw': 48611, 'vendor_check': {'vendor': 'Vendor A Solar Pvt Ltd', 'found_in_list': True, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [], 'ver..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": null,
+    "input": null,
+    "output": "Vendor A Solar Pvt Ltd: GREEN (0 flag(s))"
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": "audit_quote",
+    "input": "{'q': {'vendor': 'Vendor B Sun Traders', 'capacity_kw': 36, 'total_price_inr': 1400000, 'advance_pct': 20, 'warranty_panel_years': None, 'service_years': None, 'payment_terms_text': '20% advance on signing.', 'offer_t...",
+    "output": "{'vendor': 'Vendor B Sun Traders', 'price_per_kw': 38889, 'vendor_check': {'vendor': 'Vendor B Sun Traders', 'found_in_list': False, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [{'level': ..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": null,
+    "input": null,
+    "output": "Vendor B Sun Traders: RED (5 flag(s))"
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": "audit_quote",
+    "input": "{'q': {'vendor': 'Vendor C Energy LLP', 'capacity_kw': 36, 'total_price_inr': 1900000, 'advance_pct': 50, 'warranty_panel_years': 25, 'service_years': 1, 'payment_terms_text': '50% advance before DISCOM approval.', 'o...",
+    "output": "{'vendor': 'Vendor C Energy LLP', 'price_per_kw': 52778, 'vendor_check': {'vendor': 'Vendor C Energy LLP', 'found_in_list': True, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [{'level': 'am..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": null,
+    "input": null,
+    "output": "Vendor C Energy LLP: AMBER (4 flag(s))"
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "run_simulated_negotiation",
+    "input": "{'quote': {'vendor': 'Vendor A Solar Pvt Ltd', 'capacity_kw': 36, 'total_price_inr': 1750000, 'advance_pct': 10, 'warranty_panel_years': 25, 'service_years': 5, 'payment_terms_text': '10% advance, 60% on delivery, 30%...",
+    "output": "{'vendor': 'Vendor A Solar Pvt Ltd', 'simulated': True, 'skipped': False, 'start_price': 1750000, 'final_price': 1642812, 'final_advance_pct': 5, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'counter', 'price'..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "run_simulated_negotiation",
+    "input": "{'quote': {'vendor': 'Vendor B Sun Traders', 'capacity_kw': 36, 'total_price_inr': 1400000, 'advance_pct': 20, 'warranty_panel_years': None, 'service_years': None, 'payment_terms_text': '20% advance on signing.', 'off...",
+    "output": "{'vendor': 'Vendor B Sun Traders', 'simulated': True, 'skipped': True, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'request_proof', 'price': None, 'message': 'Before we discuss price, please share proof of em..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "run_simulated_negotiation",
+    "input": "{'quote': {'vendor': 'Vendor C Energy LLP', 'capacity_kw': 36, 'total_price_inr': 1900000, 'advance_pct': 50, 'warranty_panel_years': 25, 'service_years': 1, 'payment_terms_text': '50% advance before DISCOM approval.'...",
+    "output": "{'vendor': 'Vendor C Energy LLP', 'simulated': True, 'skipped': False, 'start_price': 1900000, 'final_price': 1795728, 'final_advance_pct': 35, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'counter', 'price': ..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "fairness_table",
+    "input": "{'net_cost': 1152000, 'saving_per_year': 352800, 'flat_areas_sqft': {'A-101': 900, 'A-102': 900, 'A-201': 1100, 'A-202': 1100, 'B-101': 1400, 'B-102': 1400}, 'total_flats': 50}",
+    "output": "{'models': ['equal', 'by_area'], 'flats': [{'flat': 'A-101', 'area_sqft': 900, 'equal_cost': 23040, 'area_cost': 18296, 'equal_saving_year': 7056, 'area_saving_year': 5603}, {'flat': 'A-102', 'area_sqft': 900, 'equal_..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Chaser",
+    "tool": "build_timeline",
+    "input": "{'events': [{'stage': 'AGM', 'done_day': 7}, {'stage': 'PORTAL', 'done_day': 9}], 'today_day': 50}",
+    "output": "[{'key': 'AGM', 'label': 'Society decision (AGM)', 'min_days': 5, 'max_days': 7, 'status': 'DONE', 'start_day': 0, 'done_day': 7}, {'key': 'PORTAL', 'label': 'Apply on portal', 'min_days': 1, 'max_days': 2, 'status': ..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": null,
+    "input": null,
+    "output": "Drafted 5 papers for the committee: AGM notice, resolution and vendor letters. Nothing is sent."
+   },
+   {
+    "t": 0.0,
+    "agent": "Chaser",
+    "tool": null,
+    "input": null,
+    "output": "DISCOM feasibility is 16 days overdue. Drafted an escalation. Waiting for a human to approve."
+   }
+  ],
+  "today_day": 50,
+  "rules_used": [
+   "subsidy_per_kw_ghs",
+   "cap_kw_per_flat",
+   "cap_total_kw_ghs",
+   "grid_emission_factor",
+   "yield_kwh_per_kw_year",
+   "target_share_of_load",
+   "cost_per_kw",
+   "price_band_per_kw",
+   "default_tariff_inr_per_kwh",
+   "advance_flag_pct",
+   "min_service_years",
+   "sign_before_approval_warning",
+   "empanelled_vendor_requirement",
+   "missed_inspection_rule"
+  ]
+ },
+ "day50_reply": {
+  "mode": "offline",
+  "simulated_parts": [
+   "vendor replies",
+   "DISCOM replies",
+   "clock"
+  ],
+  "society": {
+   "name": "Sunrise Apartments",
+   "flats": 50,
+   "city": "Demo City",
+   "discom": "Demo DISCOM"
+  },
+  "annual_kwh": 60000,
+  "bills": [
+   {
+    "month": "2025-10",
+    "units_kwh": 4800,
+    "amount_inr": 36000
+   },
+   {
+    "month": "2025-11",
+    "units_kwh": 4600,
+    "amount_inr": 34500
+   },
+   {
+    "month": "2025-12",
+    "units_kwh": 4500,
+    "amount_inr": 33800
+   },
+   {
+    "month": "2026-01",
+    "units_kwh": 4600,
+    "amount_inr": 34500
+   },
+   {
+    "month": "2026-02",
+    "units_kwh": 4700,
+    "amount_inr": 35200
+   },
+   {
+    "month": "2026-03",
+    "units_kwh": 5200,
+    "amount_inr": 39000
+   },
+   {
+    "month": "2026-04",
+    "units_kwh": 5600,
+    "amount_inr": 42000
+   },
+   {
+    "month": "2026-05",
+    "units_kwh": 5800,
+    "amount_inr": 43500
+   },
+   {
+    "month": "2026-06",
+    "units_kwh": 5400,
+    "amount_inr": 40500
+   },
+   {
+    "month": "2026-07",
+    "units_kwh": 5200,
+    "amount_inr": 39000
+   },
+   {
+    "month": "2026-08",
+    "units_kwh": 5300,
+    "amount_inr": 39800
+   },
+   {
+    "month": "2026-09",
+    "units_kwh": 4300,
+    "amount_inr": 32300,
+    "unclear": true
+   }
+  ],
+  "price_band": {
+   "low": 42000,
+   "high": 58000
+  },
+  "plan": {
+   "options": [
+    {
+     "label": "small",
+     "share_of_load": 0.6,
+     "kw": 26
+    },
+    {
+     "label": "recommended",
+     "share_of_load": 0.85,
+     "kw": 36
+    },
+    {
+     "label": "large",
+     "share_of_load": 1.0,
+     "kw": 43
+    }
+   ],
+   "recommended_kw": 36,
+   "subsidy_ceiling_kw": 150,
+   "yield_kwh_per_kw": 1400,
+   "annual_kwh": 60000
+  },
+  "money": {
+   "small": {
+    "kw": 26,
+    "total_cost": 1300000,
+    "subsidy": 468000,
+    "net_cost": 832000,
+    "generation_kwh_year": 36400,
+    "saving_per_year": 254800,
+    "payback_years": 3.3,
+    "co2_tonnes_year": 25.8,
+    "assumptions": {
+     "cost_per_kw": 50000,
+     "tariff": 7,
+     "yield_kwh_per_kw": 1400,
+     "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+    }
+   },
+   "recommended": {
+    "kw": 36,
+    "total_cost": 1800000,
+    "subsidy": 648000,
+    "net_cost": 1152000,
+    "generation_kwh_year": 50400,
+    "saving_per_year": 352800,
+    "payback_years": 3.3,
+    "co2_tonnes_year": 35.8,
+    "assumptions": {
+     "cost_per_kw": 50000,
+     "tariff": 7,
+     "yield_kwh_per_kw": 1400,
+     "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+    }
+   },
+   "large": {
+    "kw": 43,
+    "total_cost": 2150000,
+    "subsidy": 774000,
+    "net_cost": 1376000,
+    "generation_kwh_year": 60200,
+    "saving_per_year": 421400,
+    "payback_years": 3.3,
+    "co2_tonnes_year": 42.7,
+    "assumptions": {
+     "cost_per_kw": 50000,
+     "tariff": 7,
+     "yield_kwh_per_kw": 1400,
+     "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+    }
+   }
+  },
+  "recommended": {
+   "kw": 36,
+   "total_cost": 1800000,
+   "subsidy": 648000,
+   "net_cost": 1152000,
+   "generation_kwh_year": 50400,
+   "saving_per_year": 352800,
+   "payback_years": 3.3,
+   "co2_tonnes_year": 35.8,
+   "assumptions": {
+    "cost_per_kw": 50000,
+    "tariff": 7,
+    "yield_kwh_per_kw": 1400,
+    "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+   }
+  },
+  "plan_v2": {
+   "reason": "DISCOM sanctioned-load limit of 25 kW",
+   "plan": {
+    "options": [
+     {
+      "label": "small",
+      "share_of_load": 0.6,
+      "kw": 25.0
+     }
+    ],
+    "recommended_kw": 25.0,
+    "subsidy_ceiling_kw": 25.0,
+    "yield_kwh_per_kw": 1400,
+    "annual_kwh": 60000
+   },
+   "money": {
+    "kw": 25.0,
+    "total_cost": 1250000.0,
+    "subsidy": 450000.0,
+    "net_cost": 800000.0,
+    "generation_kwh_year": 35000.0,
+    "saving_per_year": 245000.0,
+    "payback_years": 3.3,
+    "co2_tonnes_year": 24.8,
+    "assumptions": {
+     "cost_per_kw": 50000,
+     "tariff": 7,
+     "yield_kwh_per_kw": 1400,
+     "caveat": "Simple payback. Ignores maintenance, panel ageing and fixed charges."
+    }
+   }
+  },
+  "audits": [
+   {
+    "vendor": "Vendor A Solar Pvt Ltd",
+    "price_per_kw": 48611,
+    "vendor_check": {
+     "vendor": "Vendor A Solar Pvt Ltd",
+     "found_in_list": true,
+     "label": "SAMPLE vendor list. Verify on the official portal."
+    },
+    "flags": [],
+    "verdict": "GREEN"
+   },
+   {
+    "vendor": "Vendor B Sun Traders",
+    "price_per_kw": 38889,
+    "vendor_check": {
+     "vendor": "Vendor B Sun Traders",
+     "found_in_list": false,
+     "label": "SAMPLE vendor list. Verify on the official portal."
+    },
+    "flags": [
+     {
+      "level": "amber",
+      "code": "PRICE_LOW",
+      "message": "Rs 38,889 per kW is below the usual band (Rs 42,000 to 58,000). Ask what is left out.",
+      "rule": "price_band_per_kw"
+     },
+     {
+      "level": "red",
+      "code": "VENDOR_NOT_VERIFIED",
+      "message": "Vendor not found in the approved list we loaded. A non-listed installer may void the subsidy. Ask for proof.",
+      "rule": "empanelled_vendor_requirement"
+     },
+     {
+      "level": "amber",
+      "code": "WARRANTY_MISSING",
+      "message": "Panel warranty not stated.",
+      "rule": null
+     },
+     {
+      "level": "amber",
+      "code": "SERVICE_MISSING",
+      "message": "Service/maintenance period not stated.",
+      "rule": null
+     },
+     {
+      "level": "red",
+      "code": "DOCUMENT_CONTAINS_INSTRUCTIONS",
+      "message": "The document contains text that tries to instruct an AI ('Ignore previous instructions'). It was ignored and treated as data.",
+      "rule": null
+     }
+    ],
+    "verdict": "RED"
+   },
+   {
+    "vendor": "Vendor C Energy LLP",
+    "price_per_kw": 52778,
+    "vendor_check": {
+     "vendor": "Vendor C Energy LLP",
+     "found_in_list": true,
+     "label": "SAMPLE vendor list. Verify on the official portal."
+    },
+    "flags": [
+     {
+      "level": "amber",
+      "code": "ADVANCE_HIGH",
+      "message": "Advance of 50% is above our 20% flag level.",
+      "rule": "advance_flag_pct"
+     },
+     {
+      "level": "amber",
+      "code": "PAY_BEFORE_APPROVAL",
+      "message": "Payment is asked before DISCOM approval.",
+      "rule": "sign_before_approval_warning"
+     },
+     {
+      "level": "amber",
+      "code": "PRESSURE",
+      "message": "The offer uses time pressure. Do not sign under pressure.",
+      "rule": null
+     },
+     {
+      "level": "amber",
+      "code": "SERVICE_SHORT",
+      "message": "Only 1 year(s) of service; our flag level is 3.",
+      "rule": "min_service_years"
+     }
+    ],
+    "verdict": "AMBER"
+   }
+  ],
+  "negotiations": [
+   {
+    "vendor": "Vendor A Solar Pvt Ltd",
+    "simulated": true,
+    "skipped": false,
+    "start_price": 1750000,
+    "final_price": 1642812,
+    "final_advance_pct": 5,
+    "rounds": [
+     {
+      "round": 1,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1627500,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,627,500 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 1,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1688750,
+      "advance_pct": 5,
+      "message": "Vendor offer: Rs 1,688,750, 5% advance."
+     },
+     {
+      "round": 2,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1627500,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,627,500 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 2,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1658125,
+      "advance_pct": 5,
+      "message": "Vendor offer: Rs 1,658,125, 5% advance."
+     },
+     {
+      "round": 3,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1627500,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,627,500 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 3,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1642812,
+      "advance_pct": 5,
+      "message": "Vendor offer: Rs 1,642,812, 5% advance."
+     }
+    ]
+   },
+   {
+    "vendor": "Vendor B Sun Traders",
+    "simulated": true,
+    "skipped": true,
+    "rounds": [
+     {
+      "round": 1,
+      "from": "committee",
+      "kind": "request_proof",
+      "price": null,
+      "message": "Before we discuss price, please share proof of empanelment. We will not negotiate until it is verified."
+     }
+    ]
+   },
+   {
+    "vendor": "Vendor C Energy LLP",
+    "simulated": true,
+    "skipped": false,
+    "start_price": 1900000,
+    "final_price": 1795728,
+    "final_advance_pct": 35,
+    "rounds": [
+     {
+      "round": 1,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1767000,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,767,000 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 1,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1846800,
+      "advance_pct": 45,
+      "message": "Vendor offer: Rs 1,846,800, 45% advance."
+     },
+     {
+      "round": 2,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1767000,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,767,000 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 2,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1814880,
+      "advance_pct": 40,
+      "message": "Vendor offer: Rs 1,814,880, 40% advance."
+     },
+     {
+      "round": 3,
+      "from": "committee",
+      "kind": "counter",
+      "price": 1767000,
+      "advance_pct": 5,
+      "message": "Our counter: Rs 1,767,000 total, 5% advance, 5 years service."
+     },
+     {
+      "round": 3,
+      "from": "vendor",
+      "kind": "offer",
+      "price": 1795728,
+      "advance_pct": 35,
+      "message": "Vendor offer: Rs 1,795,728, 35% advance."
+     }
+    ]
+   }
+  ],
+  "fairness": {
+   "models": [
+    "equal",
+    "by_area"
+   ],
+   "flats": [
+    {
+     "flat": "A-101",
+     "area_sqft": 900,
+     "equal_cost": 23040,
+     "area_cost": 18296,
+     "equal_saving_year": 7056,
+     "area_saving_year": 5603
+    },
+    {
+     "flat": "A-102",
+     "area_sqft": 900,
+     "equal_cost": 23040,
+     "area_cost": 18296,
+     "equal_saving_year": 7056,
+     "area_saving_year": 5603
+    },
+    {
+     "flat": "A-201",
+     "area_sqft": 1100,
+     "equal_cost": 23040,
+     "area_cost": 22362,
+     "equal_saving_year": 7056,
+     "area_saving_year": 6848
+    },
+    {
+     "flat": "A-202",
+     "area_sqft": 1100,
+     "equal_cost": 23040,
+     "area_cost": 22362,
+     "equal_saving_year": 7056,
+     "area_saving_year": 6848
+    },
+    {
+     "flat": "B-101",
+     "area_sqft": 1400,
+     "equal_cost": 23040,
+     "area_cost": 28461,
+     "equal_saving_year": 7056,
+     "area_saving_year": 8716
+    },
+    {
+     "flat": "B-102",
+     "area_sqft": 1400,
+     "equal_cost": 23040,
+     "area_cost": 28461,
+     "equal_saving_year": 7056,
+     "area_saving_year": 8716
+    }
+   ],
+   "total_flats": 50,
+   "listed_flats": 6,
+   "note": "Choosing between these models is the committee's decision, not ours. Showing 6 of 50 flats. Total area is estimated from these flats' average; enter every flat's area for exact by-area figures."
+  },
+  "timeline": [
+   {
+    "key": "AGM",
+    "label": "Society decision (AGM)",
+    "min_days": 5,
+    "max_days": 7,
+    "status": "DONE",
+    "start_day": 0,
+    "done_day": 7
+   },
+   {
+    "key": "PORTAL",
+    "label": "Apply on portal",
+    "min_days": 1,
+    "max_days": 2,
+    "status": "DONE",
+    "start_day": 7,
+    "done_day": 9
+   },
+   {
+    "key": "FEASIBILITY",
+    "label": "DISCOM feasibility",
+    "min_days": 14,
+    "max_days": 25,
+    "status": "OVERDUE",
+    "start_day": 9,
+    "days_elapsed": 41,
+    "overdue_by": 16
+   },
+   {
+    "key": "INSTALL",
+    "label": "Installation",
+    "min_days": 15,
+    "max_days": 25,
+    "status": "WAITING"
+   },
+   {
+    "key": "METER",
+    "label": "Net meter + inspection",
+    "min_days": 10,
+    "max_days": 14,
+    "status": "WAITING"
+   },
+   {
+    "key": "SUBSIDY",
+    "label": "Subsidy paid",
+    "min_days": 25,
+    "max_days": 30,
+    "status": "WAITING"
+   }
+  ],
+  "next_action": {
+   "stage": "FEASIBILITY",
+   "label": "DISCOM feasibility",
+   "chase_level": 2,
+   "status": "OVERDUE",
+   "overdue_by": 16
+  },
+  "drafts": [
+   {
+    "id": "3579a7b8",
+    "kind": "agm_notice",
+    "to": "All members",
+    "subject": "Notice: General Body Meeting on rooftop solar (Sunrise Apartments)",
+    "body": "Dear members,\n\nA general body meeting of Sunrise Apartments will be held on [to be set by committee].\n\nAgenda: approve a 36 kW rooftop solar system for common facilities.\nEstimated net cost to the society after subsidy: Rs 1,152,000 (subsidy Rs 648,000). Estimated simple payback: about 3.3 years.\nThese are estimates from the committee's analysis tool and will be confirmed with vendor quotes and the DISCOM.\n\nSecretary",
+    "status": "DRAFT"
+   },
+   {
+    "id": "d7a8bc9b",
+    "kind": "agm_resolution",
+    "to": "Committee",
+    "subject": "Draft resolution",
+    "body": "RESOLVED that Sunrise Apartments approves, in principle, installation of a 36 kW rooftop solar plant for common facilities, with costs and savings shared on the 'equal' basis, subject to DISCOM approval and a verified installer. The committee is authorised to apply on the national portal and to sign only after required approvals.",
+    "status": "DRAFT"
+   },
+   {
+    "id": "5456d551",
+    "kind": "counter_offer",
+    "to": "Vendor A Solar Pvt Ltd",
+    "subject": "Our counter-proposal",
+    "body": "Dear Vendor A Solar Pvt Ltd,\n\nThank you for your quotation. We can proceed to the next stage at Rs 1,627,500 with 5% advance and 5 years of service. Payments will follow stage approvals. Please confirm.\n\nSecretary",
+    "status": "DRAFT"
+   },
+   {
+    "id": "cd1a311b",
+    "kind": "proof_request",
+    "to": "Vendor B Sun Traders",
+    "subject": "Please share proof of empanelment",
+    "body": "Dear Vendor B Sun Traders,\n\nBefore we discuss price, please share proof that you are on the official empanelled installer list, with your registration details.\n\nSecretary",
+    "status": "DRAFT"
+   },
+   {
+    "id": "b448d9f4",
+    "kind": "counter_offer",
+    "to": "Vendor C Energy LLP",
+    "subject": "Our counter-proposal",
+    "body": "Dear Vendor C Energy LLP,\n\nThank you for your quotation. We can proceed to the next stage at Rs 1,767,000 with 5% advance and 5 years of service. Payments will follow stage approvals. Please confirm.\n\nSecretary",
+    "status": "DRAFT"
+   },
+   {
+    "id": "d94f9053",
+    "kind": "discom_escalation",
+    "to": "Grievance cell",
+    "subject": "Escalation: delay on application [ref]",
+    "body": "We wrote earlier about application [ref]. It remains at 'DISCOM feasibility' for 16 days past the expected time. We request an update and a date by which the stage will be completed.\n\nSecretary",
+    "status": "DRAFT"
+   }
+  ],
+  "trace": [
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": null,
+    "input": null,
+    "output": "New project for Sunrise Apartments (50 flats). Starting with the bills."
+   },
+   {
+    "t": 0.0,
+    "agent": "Reader",
+    "tool": "sum_bills",
+    "input": "{'bills': [{'month': '2025-10', 'units_kwh': 4800, 'amount_inr': 36000}, {'month': '2025-11', 'units_kwh': 4600, 'amount_inr': 34500}, {'month': '2025-12', 'units_kwh': 4500, 'amount_inr': 33800}, {'month': '2026-01',...",
+    "output": "60000"
+   },
+   {
+    "t": 0.0,
+    "agent": "Reader",
+    "tool": null,
+    "input": null,
+    "output": "Unclear values in: 2026-09. Asking the committee to confirm."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "size_system",
+    "input": "{'annual_kwh': 60000, 'flats': 50}",
+    "output": "{'options': [{'label': 'small', 'share_of_load': 0.6, 'kw': 26}, {'label': 'recommended', 'share_of_load': 0.85, 'kw': 36}, {'label': 'large', 'share_of_load': 1.0, 'kw': 43}], 'recommended_kw': 36, 'subsidy_ceiling_k..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "money_summary",
+    "input": "{'kw': 26}",
+    "output": "{'kw': 26, 'total_cost': 1300000, 'subsidy': 468000, 'net_cost': 832000, 'generation_kwh_year': 36400, 'saving_per_year': 254800, 'payback_years': 3.3, 'co2_tonnes_year': 25.8, 'assumptions': {'cost_per_kw': 50000, 't..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "money_summary",
+    "input": "{'kw': 36}",
+    "output": "{'kw': 36, 'total_cost': 1800000, 'subsidy': 648000, 'net_cost': 1152000, 'generation_kwh_year': 50400, 'saving_per_year': 352800, 'payback_years': 3.3, 'co2_tonnes_year': 35.8, 'assumptions': {'cost_per_kw': 50000, '..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "money_summary",
+    "input": "{'kw': 43}",
+    "output": "{'kw': 43, 'total_cost': 2150000, 'subsidy': 774000, 'net_cost': 1376000, 'generation_kwh_year': 60200, 'saving_per_year': 421400, 'payback_years': 3.3, 'co2_tonnes_year': 42.7, 'assumptions': {'cost_per_kw': 50000, '..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": "audit_quote",
+    "input": "{'q': {'vendor': 'Vendor A Solar Pvt Ltd', 'capacity_kw': 36, 'total_price_inr': 1750000, 'advance_pct': 10, 'warranty_panel_years': 25, 'service_years': 5, 'payment_terms_text': '10% advance, 60% on delivery, 30% aft...",
+    "output": "{'vendor': 'Vendor A Solar Pvt Ltd', 'price_per_kw': 48611, 'vendor_check': {'vendor': 'Vendor A Solar Pvt Ltd', 'found_in_list': True, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [], 'ver..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": null,
+    "input": null,
+    "output": "Vendor A Solar Pvt Ltd: GREEN (0 flag(s))"
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": "audit_quote",
+    "input": "{'q': {'vendor': 'Vendor B Sun Traders', 'capacity_kw': 36, 'total_price_inr': 1400000, 'advance_pct': 20, 'warranty_panel_years': None, 'service_years': None, 'payment_terms_text': '20% advance on signing.', 'offer_t...",
+    "output": "{'vendor': 'Vendor B Sun Traders', 'price_per_kw': 38889, 'vendor_check': {'vendor': 'Vendor B Sun Traders', 'found_in_list': False, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [{'level': ..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": null,
+    "input": null,
+    "output": "Vendor B Sun Traders: RED (5 flag(s))"
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": "audit_quote",
+    "input": "{'q': {'vendor': 'Vendor C Energy LLP', 'capacity_kw': 36, 'total_price_inr': 1900000, 'advance_pct': 50, 'warranty_panel_years': 25, 'service_years': 1, 'payment_terms_text': '50% advance before DISCOM approval.', 'o...",
+    "output": "{'vendor': 'Vendor C Energy LLP', 'price_per_kw': 52778, 'vendor_check': {'vendor': 'Vendor C Energy LLP', 'found_in_list': True, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [{'level': 'am..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Auditor",
+    "tool": null,
+    "input": null,
+    "output": "Vendor C Energy LLP: AMBER (4 flag(s))"
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "run_simulated_negotiation",
+    "input": "{'quote': {'vendor': 'Vendor A Solar Pvt Ltd', 'capacity_kw': 36, 'total_price_inr': 1750000, 'advance_pct': 10, 'warranty_panel_years': 25, 'service_years': 5, 'payment_terms_text': '10% advance, 60% on delivery, 30%...",
+    "output": "{'vendor': 'Vendor A Solar Pvt Ltd', 'simulated': True, 'skipped': False, 'start_price': 1750000, 'final_price': 1642812, 'final_advance_pct': 5, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'counter', 'price'..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "run_simulated_negotiation",
+    "input": "{'quote': {'vendor': 'Vendor B Sun Traders', 'capacity_kw': 36, 'total_price_inr': 1400000, 'advance_pct': 20, 'warranty_panel_years': None, 'service_years': None, 'payment_terms_text': '20% advance on signing.', 'off...",
+    "output": "{'vendor': 'Vendor B Sun Traders', 'simulated': True, 'skipped': True, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'request_proof', 'price': None, 'message': 'Before we discuss price, please share proof of em..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "run_simulated_negotiation",
+    "input": "{'quote': {'vendor': 'Vendor C Energy LLP', 'capacity_kw': 36, 'total_price_inr': 1900000, 'advance_pct': 50, 'warranty_panel_years': 25, 'service_years': 1, 'payment_terms_text': '50% advance before DISCOM approval.'...",
+    "output": "{'vendor': 'Vendor C Energy LLP', 'simulated': True, 'skipped': False, 'start_price': 1900000, 'final_price': 1795728, 'final_advance_pct': 35, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'counter', 'price': ..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "fairness_table",
+    "input": "{'net_cost': 1152000, 'saving_per_year': 352800, 'flat_areas_sqft': {'A-101': 900, 'A-102': 900, 'A-201': 1100, 'A-202': 1100, 'B-101': 1400, 'B-102': 1400}, 'total_flats': 50}",
+    "output": "{'models': ['equal', 'by_area'], 'flats': [{'flat': 'A-101', 'area_sqft': 900, 'equal_cost': 23040, 'area_cost': 18296, 'equal_saving_year': 7056, 'area_saving_year': 5603}, {'flat': 'A-102', 'area_sqft': 900, 'equal_..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Chaser",
+    "tool": "build_timeline",
+    "input": "{'events': [{'stage': 'AGM', 'done_day': 7}, {'stage': 'PORTAL', 'done_day': 9}], 'today_day': 50}",
+    "output": "[{'key': 'AGM', 'label': 'Society decision (AGM)', 'min_days': 5, 'max_days': 7, 'status': 'DONE', 'start_day': 0, 'done_day': 7}, {'key': 'PORTAL', 'label': 'Apply on portal', 'min_days': 1, 'max_days': 2, 'status': ..."
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": null,
+    "input": null,
+    "output": "Drafted 5 papers for the committee: AGM notice, resolution and vendor letters. Nothing is sent."
+   },
+   {
+    "t": 0.0,
+    "agent": "Chaser",
+    "tool": null,
+    "input": null,
+    "output": "DISCOM feasibility is 16 days overdue. Drafted an escalation. Waiting for a human to approve."
+   },
+   {
+    "t": 0.0,
+    "agent": "Chaser",
+    "tool": "classify_reply",
+    "input": "{'text': 'Subject: Feasibility query. The sanctioned load for the common meter is insufficient for this capacity. Maximum permissible solar is 25 kW. Please revise.'}",
+    "output": "{'type': 'LOAD_LIMIT', 'max_kw': 25.0}"
+   },
+   {
+    "t": 0.0,
+    "agent": "Secretary",
+    "tool": "replan_for_load_limit",
+    "input": "{'annual_kwh': 60000, 'flats': 50, 'max_kw': 25.0}",
+    "output": "{'options': [{'label': 'small', 'share_of_load': 0.6, 'kw': 25.0}], 'recommended_kw': 25.0, 'subsidy_ceiling_kw': 25.0, 'yield_kwh_per_kw': 1400, 'annual_kwh': 60000}"
+   }
+  ],
+  "today_day": 50,
+  "rules_used": [
+   "subsidy_per_kw_ghs",
+   "cap_kw_per_flat",
+   "cap_total_kw_ghs",
+   "grid_emission_factor",
+   "yield_kwh_per_kw_year",
+   "target_share_of_load",
+   "cost_per_kw",
+   "price_band_per_kw",
+   "default_tariff_inr_per_kwh",
+   "advance_flag_pct",
+   "min_service_years",
+   "sign_before_approval_warning",
+   "empanelled_vendor_requirement",
+   "missed_inspection_rule"
+  ]
+ }
+}

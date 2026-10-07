@@ -1,0 +1,3 @@
+-r requirements-agents.txt
+pytest>=8
+reportlab>=4
