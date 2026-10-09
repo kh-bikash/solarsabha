@@ -21,6 +21,8 @@ Routes that change anything also need `x-actor`: the name of a committee member 
   PUT    /projects/{id}/drafts/{did}          {"subject", "body", "editor"}
   POST   /projects/{id}/drafts/{did}/approve  {"name": "<member>"}   (nothing is sent in this build)
   GET    /projects/{id}/drafts/{did}/docx     Word download
+  POST   /projects/{id}/review                live mode: the Secretary calls the Auditor and Chaser and reports
+  POST   /projects/{id}/drafts/{did}/polish   live mode: AI rewording; rejected if any number, date or reference changes
 """
 import base64
 import json
@@ -183,11 +185,12 @@ def r_clock_reset(ev, store, doc, actor, m):
 def r_reply(ev, store, doc, actor, m):
     b = _parse(ev, S.DiscomReply)
     doc["discom_reply"] = b.text
+    P.read_reply_live(doc)
     P.log(doc, actor, "added a DISCOM reply", b.text[:80])
     return _save(store, P.recompute(doc))
 
 def r_reply_clear(ev, store, doc, actor, m):
-    doc["discom_reply"] = None
+    doc["discom_reply"], doc["reply_reading"] = None, None
     P.log(doc, actor, "removed the DISCOM reply")
     return _save(store, P.recompute(doc))
 
@@ -200,6 +203,12 @@ def r_draft_approve(ev, store, doc, actor, m):
     b = _parse(ev, S.Approve)
     P.require_role(doc, b.name)
     return _save(store, P.approve_draft(doc, m.group(1), P.member(doc, b.name)["name"]))
+
+def r_review(ev, store, doc, actor, m):
+    return _save(store, P.run_review(doc, actor))
+
+def r_draft_polish(ev, store, doc, actor, m):
+    return _save(store, P.polish_draft(doc, m.group(1), actor))
 
 def r_draft_docx(ev, store, doc, actor, m):
     d = P.find_draft(doc, m.group(1))
@@ -217,6 +226,7 @@ ROUTES = [
     ("POST", r"/discom-reply", r_reply, "edit"), ("DELETE", r"/discom-reply", r_reply_clear, "edit"),
     ("PUT", r"/drafts/(\w+)", r_draft_edit, "edit"), ("POST", r"/drafts/(\w+)/approve", r_draft_approve, "edit"),
     ("GET", r"/drafts/(\w+)/docx", r_draft_docx, "read"),
+    ("POST", r"/review", r_review, "edit"), ("POST", r"/drafts/(\w+)/polish", r_draft_polish, "edit"),
 ]
 
 def _route(event: dict, method: str, path: str):

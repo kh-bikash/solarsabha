@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { MODE, api, SAMPLE_DISCOM_REPLY } from './api.js'
 import { fromHash, getActor, rememberProject, forgetProject, setActor, setHash } from './session.js'
 import Office from './office/Office.jsx'
-import { describe, boardItems, AGENT_COLOR } from './office/story.js'
+import { describe, describeAgentRun, boardItems, AGENT_COLOR } from './office/story.js'
 import { PixelIcon } from './pixel/Sprite.jsx'
 import { ICONS, iconPal } from './pixel/sprites.js'
 import Welcome from './components/Welcome.jsx'
@@ -172,6 +172,14 @@ function Workspace({ session, initial, onLeave, onActor, notify }) {
     } finally { setEnvelope(false) }
   })
   const clearReply = () => act(async () => continueWith(await api.clearReply(session)))
+  const runReview = () => act(async () => {
+    notify('ok', 'The Secretary is reviewing the project with the Auditor and the Chaser…')
+    const next = await api.review(session)
+    projectRef.current = next
+    setProject(next)
+    setQueue((q) => [...q, ...describeAgentRun(next.review.trace).map(withKey)])
+    notify('ok', 'Review ready: see the quote cards, the Timeline and Logbook > Agents’ review.')
+  })
   const pick = (f) => { setFolder(f); filesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
 
   const r = project.result
@@ -198,7 +206,8 @@ function Workspace({ session, initial, onLeave, onActor, notify }) {
   const chaserAsleep = n.status !== 'OVERDUE' && current?.agent !== 'Chaser' && played.length > 0
   const last = current || played[played.length - 1]
   const total = played.length + queue.length + (current ? 1 : 0)
-  const modeLabel = MODE === 'MOCK' ? 'Static demo' : r.reader_mode === 'live' ? 'Live AI reader on Bedrock' : 'Offline reader · no AI model'
+  const live = r.reader_mode === 'live'
+  const modeLabel = MODE === 'MOCK' ? 'Static demo' : live ? 'Live agents on Bedrock' : 'Offline reader · no AI model'
   const soc = project.inputs.society
 
   return (
@@ -266,6 +275,12 @@ function Workspace({ session, initial, onLeave, onActor, notify }) {
               ? <button className="btn ghost" disabled={busy || !canEdit} onClick={clearReply}>Remove the DISCOM reply</button>
               : <button className="btn dark" disabled={busy || !editRole} onClick={() => { setReplyText(''); setReplyOpen(true) }}>
                   <PixelIcon grid={ICONS.mail} pal={iconPal('#fbf8f1')} size={14} />A DISCOM reply arrived</button>}
+            <button className="btn dark" disabled={busy || !live || !canEdit} onClick={runReview}
+              title={live ? 'The Secretary calls the Auditor and the Chaser on Amazon Bedrock' : 'Live agents are off: this deployment runs the offline reader'}>
+              Ask the agents to review</button>
+            {project.review && <p className={'fine review-state' + (r.review_stale ? ' stale' : '')}>
+              {r.review_stale ? 'The agents’ review is out of date: inputs changed since.' : `Reviewed by the agents on ${new Date(project.review.at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}.`}</p>}
+            {!live && MODE === 'LIVE' && <p className="fine">Live agents are off in this deployment (offline reader).</p>}
             <div className="ctl-row">
               <button className="btn ghost" onClick={() => setSpeed(speed === 1 ? 2 : 1)} aria-label="Playback speed">{speed}× speed</button>
             </div>
@@ -287,13 +302,13 @@ function Workspace({ session, initial, onLeave, onActor, notify }) {
         <div className="folder">
           {folder === 'plan' && <PlanCard r={r} canEdit={canEdit} session={session} onSaved={onSaved} notify={notify} goTo={setFolder} />}
           {folder === 'docs' && <Documents project={project} session={session} canEdit={canEdit} onSaved={onSaved} notify={notify} />}
-          {folder === 'quotes' && <QuoteTable audits={r.audits} band={r.price_band} rulebook={r.rulebook} goTo={setFolder} />}
+          {folder === 'quotes' && <QuoteTable audits={r.audits} band={r.price_band} rulebook={r.rulebook} goTo={setFolder} review={project.review} stale={r.review_stale} />}
           {folder === 'pays' && <Fairness fairness={r.fairness} payback={r.recommended?.payback_years} goTo={setFolder} />}
           {folder === 'timeline' && <Timeline r={r} project={project} session={session} canEdit={canEdit} onSaved={onSaved} notify={notify} />}
           {folder === 'room' && <Arena negotiations={r.negotiations} audits={r.audits} />}
-          {folder === 'desk' && <Drafts drafts={project.drafts} session={session} canEdit={canEdit} canApprove={editRole} actor={session.actor}
+          {folder === 'desk' && <Drafts drafts={project.drafts} session={session} canEdit={canEdit} canApprove={editRole} canPolish={canEdit && live} actor={session.actor}
             onSaved={(next) => { projectRef.current = next; setProject(next) }} notify={notify} />}
-          {folder === 'log' && <TracePanel played={played} current={current} mode={r.mode} audit={project.audit} />}
+          {folder === 'log' && <TracePanel played={played} current={current} mode={live ? 'live' : 'offline'} audit={project.audit} review={project.review} stale={r.review_stale} />}
           {folder === 'settings' && <Settings project={project} session={session} role={MODE === 'LIVE' ? role : 'viewer'}
             onSaved={(next) => { projectRef.current = next; setProject(next) }} onDeleted={() => { forgetProject(session.id); onLeave() }} notify={notify} />}
         </div>

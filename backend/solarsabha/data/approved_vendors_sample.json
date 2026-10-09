@@ -1,4 +1,9 @@
 {
   "_label": "SAMPLE DATA. Fictional vendors for the demo. In real use, check the official list on the national portal.",
-  "vendors": ["Suryakiran Rooftop Solar Pvt Ltd", "Urja Prime Energy LLP", "Harit Power Systems Pvt Ltd"]
+  "vendors": [
+    "Suryakiran Rooftop Solar Pvt Ltd",
+    "Urja Prime Energy LLP",
+    "Harit Power Systems Pvt Ltd",
+    "Prakash Solar Solutions"
+  ]
 }

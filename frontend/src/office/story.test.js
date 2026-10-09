@@ -1,6 +1,6 @@
 import { describe as suite, expect, it } from 'vitest'
 import demo from '../mock/demo.json'
-import { describe, boardItems, lakh, inr } from './story.js'
+import { describe, describeAgentRun, boardItems, lakh, inr } from './story.js'
 
 const start = demo.start.result
 const day50 = demo.day50_reply.result
@@ -41,6 +41,19 @@ suite('boardItems() ticks the five jobs from what has played', () => {
   it('does not tick quotes when there are none', () => {
     const empty = { ...start, audits: [] }
     expect(boardItems([], empty)[3].done).toBe(false)
+  })
+})
+
+suite('describeAgentRun() for live agent traces', () => {
+  it('shows specialists as delegations and tools with their real output', () => {
+    const run = describeAgentRun([
+      { agent: 'Secretary', tool: 'auditor', output: 'Sasta Sun Traders: RED, not registered' },
+      { agent: 'Auditor', tool: 'audit_quote', output: '{"verdict": "RED"}' },
+      { agent: 'Secretary', tool: null, output: 'MCP tools unavailable' },
+    ])
+    expect(run[0].text).toMatch(/^Asked the Auditor: Sasta/)
+    expect(run[1]).toMatchObject({ agent: 'Auditor', object: 'cabinet', code: true })
+    expect(run[2]).toMatchObject({ tool: null, text: 'MCP tools unavailable' })
   })
 })
 

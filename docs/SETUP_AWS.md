@@ -1,5 +1,18 @@
 # AWS setup and deployment
 
+## Current deployment (9 October 2026)
+
+| | |
+|---|---|
+| Site (Amplify Hosting) | https://main.d2vnrqt0vyz925.amplifyapp.com (app `d2vnrqt0vyz925`, branch `main`) |
+| API | https://f9x2xp42wg.execute-api.ap-south-1.amazonaws.com |
+| Stack | `solarsabha` in ap-south-1, `ReaderMode=offline`, `AllowedOrigin` = the site |
+
+On Windows build with `sam build --use-container` (Docker Desktop running): a plain Windows build pulls a Windows-only
+dependency of the MCP library. To redeploy the site: build `frontend/` with `VITE_API_URL=<ApiUrl>`, zip `dist/`, then
+`aws amplify create-deployment`, upload the zip, `aws amplify start-deployment` (or connect the GitHub repo in the Amplify console).
+To remove everything: `sam delete --stack-name solarsabha` and `aws amplify delete-app --app-id d2vnrqt0vyz925`.
+
 ## 1. Account and access
 1. Verify your student profile on AWS Builder Center (event requirement). A Builder ID is not an AWS account.
 2. Create an AWS account, turn on MFA for the root user, and create a **Zero spend** budget (Billing > Budgets).

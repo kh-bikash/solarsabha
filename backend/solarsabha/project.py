@@ -46,8 +46,17 @@ def retention_days() -> int:
     return int(os.environ.get("RETENTION_DAYS", "365"))
 
 def reader_mode() -> str:
-    """'live' uses the Bedrock Reader agent; anything else uses the offline text reader."""
+    """'live' turns on the Bedrock agents (Reader, Secretary, Auditor, Chaser); anything else is the offline mode."""
     return "live" if os.environ.get("READER_MODE") == "live" and os.environ.get("BEDROCK_MODEL_ID") else "offline"
+
+def require_live():
+    if reader_mode() != "live":
+        raise ProjectError(409, "the live agents are switched off (offline mode). Set READER_MODE=live and BEDROCK_MODEL_ID.")
+
+def inputs_hash(doc: dict) -> str:
+    """Changes whenever anything a review depends on changes."""
+    import json
+    return _hash(json.dumps([doc["inputs"], doc.get("events"), doc.get("discom_reply"), doc.get("assumptions")], sort_keys=True, default=str))[:16]
 
 # ---------- creation, access, roles ----------
 
@@ -121,8 +130,10 @@ def _content_hash(subject: str, body: str) -> str:
 def recompute(doc: dict) -> dict:
     td = today_day(doc)
     out = run_offline(doc["inputs"], today_day=td, events=events_as_days(doc), discom_reply=doc.get("discom_reply"),
-                      assumptions=doc.get("assumptions"))
+                      assumptions=doc.get("assumptions"), reply_reading=doc.get("reply_reading"))
     out["reader_mode"] = reader_mode()
+    rv = doc.get("review")
+    out["review_stale"] = bool(rv) and rv.get("input_hash") != inputs_hash(doc)
     out["clock"] = {"started_on": doc["started_on"], "today_day": td, "sim_offset_days": doc.get("sim_offset_days", 0),
                     "simulated": doc.get("sim_offset_days", 0) > 0}
     out["states"] = rules.INDIA_STATES
@@ -163,6 +174,50 @@ def approve_draft(doc: dict, did: str, name: str):
     st.update({"approved_by": name, "approved_at": _now(), "approved_hash": _content_hash(d["subject"], d["body"])})
     log(doc, name, "approved draft", d["subject"])
     return recompute(doc)
+
+# ---------- live agents ----------
+
+def _agents_failed(e: Exception) -> ProjectError:
+    """Bedrock or agent errors become a clear message instead of a server error."""
+    msg = getattr(e, "response", {}).get("Error", {}).get("Message") if hasattr(e, "response") else None
+    return ProjectError(502, f"the agents could not run: {msg or type(e).__name__}. Nothing was changed.")
+
+def run_review(doc: dict, actor: str):
+    require_live()
+    from .agents import live
+    try:
+        out = live.review(doc)
+    except Exception as e:
+        raise _agents_failed(e)
+    doc["review"] = {"at": _now(), "by": actor, "input_hash": inputs_hash(doc), "mcp": out["mcp"], **out}
+    log(doc, actor, "asked the agents for a review", out["review"]["summary"][:120])
+    return recompute(doc)
+
+def read_reply_live(doc: dict):
+    """The Chaser agent's reading of the DISCOM reply; falls back to the rule-based reader if anything fails."""
+    doc["reply_reading"] = None
+    if reader_mode() != "live" or not doc.get("discom_reply"):
+        return
+    try:
+        from .agents import live
+        out = live.read_reply(doc["discom_reply"], doc)
+        doc["reply_reading"] = out["reading"]
+    except Exception as e:
+        log(doc, "Chaser", "live reading of the DISCOM reply failed; used the rule-based reader", type(e).__name__)
+
+def polish_draft(doc: dict, did: str, actor: str):
+    require_live()
+    from .agents import live
+    d = find_draft(doc, did)
+    try:
+        out = live.polish(d, doc)
+    except Exception as e:
+        raise _agents_failed(e)
+    if not out["ok"]:
+        raise ProjectError(422, "the AI changed a number, date or reference, so its wording was rejected. Your letter is unchanged.")
+    doc = edit_draft(doc, did, d["subject"], out["body"], "Secretary (AI)")
+    log(doc, actor, "asked the Secretary to polish a letter", d["subject"])
+    return doc
 
 # ---------- documents ----------
 

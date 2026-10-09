@@ -8,7 +8,8 @@ const KIND = {
 }
 const when = (iso) => new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
-export default function Drafts({ drafts, session, canEdit, canApprove, onSaved, notify, actor }) {
+export default function Drafts({ drafts, session, canEdit, canApprove, canPolish, onSaved, notify, actor }) {
+  const [polishing, setPolishing] = useState(null)
   const [open, setOpen] = useState(null)
   const [edit, setEdit] = useState(null)
   if (!drafts.length) {
@@ -17,6 +18,11 @@ export default function Drafts({ drafts, session, canEdit, canApprove, onSaved, 
   const save = async () => {
     try { onSaved(await api.editDraft(session, edit.id, edit.subject, edit.body)); setEdit(null); notify('ok', 'Draft saved. It needs approval again.') }
     catch (e) { notify('error', e.message) }
+  }
+  const polish = async (d) => {
+    setPolishing(d.id)
+    try { onSaved(await api.polishDraft(session, d.id)); notify('ok', 'Reworded by the Secretary. Facts unchanged. It needs approval.') }
+    catch (e) { notify('error', e.message) } finally { setPolishing(null) }
   }
   const approve = async (d) => {
     try { onSaved(await api.approveDraft(session, d.id)); notify('ok', `Approved by ${actor}. Nothing has been sent.`) } catch (e) { notify('error', e.message) }
@@ -46,6 +52,7 @@ export default function Drafts({ drafts, session, canEdit, canApprove, onSaved, 
                   <>
                     <button className="btn ghost" onClick={() => setOpen(open === d.id ? null : d.id)}>{open === d.id ? 'Fold' : 'Read'}</button>
                     {canEdit && <button className="btn ghost" onClick={() => { setEdit({ id: d.id, subject: d.subject, body: d.body }); setOpen(null) }}>Edit</button>}
+                    {canPolish && <button className="btn ghost" disabled={polishing === d.id} title="AI rewording; rejected if any number, date or reference changes" onClick={() => polish(d)}>{polishing === d.id ? 'Polishing…' : 'Polish (AI)'}</button>}
                     <button className="btn ghost" onClick={() => api.downloadDraft(session, d.id).catch((e) => notify('error', e.message))}>Word</button>
                     {canApprove && actor && d.status === 'DRAFT' && <button className="btn" title={`Approve as ${actor}`} onClick={() => approve(d)}>Approve</button>}
                   </>

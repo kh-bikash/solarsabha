@@ -4,7 +4,8 @@ Run `python scripts/smoke_live.py` once credentials are ready; fix anything it r
 import os
 from strands import Agent, tool
 from strands.models import BedrockModel
-from ..trace import Trace, TraceHandler
+from strands.handlers.callback_handler import null_callback_handler
+from ..trace import Trace, TraceHooks
 from ..tools import sizing, quotes, timeline, drafts
 from .. import rules, replan
 from . import prompts
@@ -72,27 +73,40 @@ def draft_discom_escalation(stage_label: str, overdue_days: int, application_ref
     """Draft (not send) an escalation to the grievance cell."""
     return drafts.discom_escalation(stage_label, overdue_days, application_ref)
 
+MCP_FOR = {"secretary": {"get_rule", "list_rules", "size_system", "money_summary"},
+           "auditor": {"get_rule", "list_rules", "check_vendor", "scan_for_injection"}}
+
+def _with_mcp(builtin: list, extra: list | None, role: str) -> list:
+    """SolarRules MCP tools replace built-ins with the same name (one trusted source of rules and maths);
+    each agent takes only the MCP tools that fit its job."""
+    mcp = {t.tool_name: t for t in (extra or []) if t.tool_name in MCP_FOR[role]}
+    return [t for t in builtin if t.tool_name not in mcp] + list(mcp.values())
+
+def _hooks(trace, name, tools, extra=()):
+    allowed = {t.tool_name for t in tools} | set(extra)
+    return [TraceHooks(trace, name, allowed)]
+
 def build_reader(trace: Trace | None = None) -> Agent:
     return Agent(name="reader", description="Reads bills and quotes (photos or PDFs) into structured fields.",
-                 model=model(), system_prompt=prompts.READER, tools=[],
-                 callback_handler=TraceHandler(trace, "Reader") if trace else None)
+                 model=model(), system_prompt=prompts.READER, tools=[], hooks=_hooks(trace, "Reader", []),
+                 callback_handler=null_callback_handler)
 
 def build_auditor(trace: Trace | None = None, extra_tools: list | None = None) -> Agent:
+    tools = _with_mcp([audit_quote, check_vendor, get_rule], extra_tools, "auditor")
     return Agent(name="auditor", description="Audits vendor quotes for risks and explains the flags in plain words.",
-                 model=model(), system_prompt=prompts.AUDITOR, tools=[audit_quote, check_vendor, get_rule] + (extra_tools or []),
-                 callback_handler=TraceHandler(trace, "Auditor") if trace else None)
+                 model=model(), system_prompt=prompts.AUDITOR, tools=tools, hooks=_hooks(trace, "Auditor", tools),
+                 callback_handler=null_callback_handler)
 
 def build_chaser(trace: Trace | None = None) -> Agent:
+    tools = [build_timeline, next_action, classify_reply, replan_for_load_limit, draft_discom_reminder, draft_discom_escalation, get_rule]
     return Agent(name="chaser", description="Tracks the timeline, reads DISCOM replies, drafts follow-ups and re-plans.",
-                 model=model(), system_prompt=prompts.CHASER,
-                 tools=[build_timeline, next_action, classify_reply, replan_for_load_limit, draft_discom_reminder, draft_discom_escalation, get_rule],
-                 callback_handler=TraceHandler(trace, "Chaser") if trace else None)
+                 model=model(), system_prompt=prompts.CHASER, tools=tools, hooks=_hooks(trace, "Chaser", tools),
+                 callback_handler=null_callback_handler)
 
 def build_secretary(trace: Trace | None = None, extra_tools: list | None = None) -> Agent:
     """Coordinator using the 'agents as tools' pattern: specialists are exposed to it as tools."""
     reader, auditor, chaser = build_reader(trace), build_auditor(trace, extra_tools), build_chaser(trace)
+    tools = [reader.as_tool(name="reader"), auditor.as_tool(name="auditor"), chaser.as_tool(name="chaser")] +         _with_mcp([size_system, money_summary, get_rule], extra_tools, "secretary")
     return Agent(name="secretary", description="Coordinator that talks to the committee.", model=model(),
-                 system_prompt=prompts.SECRETARY,
-                 tools=[reader.as_tool(name="reader"), auditor.as_tool(name="auditor"), chaser.as_tool(name="chaser"),
-                        size_system, money_summary, get_rule] + (extra_tools or []),
-                 callback_handler=TraceHandler(trace, "Secretary") if trace else None)
+                 system_prompt=prompts.SECRETARY, tools=tools, hooks=_hooks(trace, "Secretary", tools),
+                 callback_handler=null_callback_handler)

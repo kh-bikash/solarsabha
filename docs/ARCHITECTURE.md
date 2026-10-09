@@ -129,6 +129,49 @@ stateDiagram-v2
 | `result` | latest pipeline output (plan, audit, timeline, drafts, trace, rulebook) |
 | `alarm_at` | when the Chaser wakes next |
 
+## Live agents in the app (READER_MODE=live)
+
+```mermaid
+sequenceDiagram
+  participant P as Committee member
+  participant API as API Lambda
+  participant SEC as Sabha Secretary (Bedrock)
+  participant AUD as Auditor
+  participant CHS as Chaser
+  participant T as Plain-code tools / SolarRules MCP
+  P->>API: POST /review ("Ask the agents to review")
+  API->>SEC: project facts as JSON (data, not instructions)
+  SEC->>AUD: explain each quote
+  AUD->>T: audit_quote, check_vendor, get_rule
+  SEC->>CHS: what next with the DISCOM?
+  CHS->>T: build_timeline, next_action
+  SEC-->>API: structured LiveReview (summary, vendor notes, next step, not verified)
+  API-->>P: review + every tool call with its real output (office replay, Logbook)
+```
+
+- `TraceHooks` (Strands hooks) record each tool call with its real output and **cancel any tool outside an agent's allowlist**.
+- A DISCOM reply is read by the Chaser agent into a structured `ReplyReading`; if the agent fails, the rule-based reader is used.
+- "Polish (AI)" rewords a letter; `facts_unchanged()` rejects the result if any number, date or reference changed.
+- If Bedrock refuses (for example a restricted account), the API returns a clear 502 and nothing is changed.
+
+## Human checkpoints (guide, Section 17)
+
+| The agent wants to... | Where it is enforced |
+|---|---|
+| Finalise a size recommendation | Assumptions are shown with their source and edited by the committee; the review lists "needs the committee's decision" |
+| Send any message to a vendor or official | Impossible: no send tool exists; `TraceHooks` blocks any tool not on the agent's list; letters need a named member's approval (`approve_draft`), withdrawn if the text changes |
+| State that a rule applies | Rule citations show value, source, status and date (`RuleCite`); prompts require `get_rule` |
+| Say a vendor is approved | Only `check_vendor` against the loaded list; otherwise "not found"; the list is labelled sample |
+| Anything involving money or signatures | No such tool exists anywhere in the codebase |
+
+We use app-level approvals rather than Strands interrupts because approvals happen days later, by a different person,
+on a stored letter. An interrupt would have to keep an agent paused across Lambda calls for days.
+
+## Choices against the original tech list
+- **Step Functions**: not used. Waiting is done by EventBridge Scheduler alarms and approvals are stored state, so a
+  long-running workflow would add moving parts without a job to do.
+- **SES**: not used on purpose. The product never sends; people send the downloaded letters.
+
 ## Plain code vs AI
 | Plain code (tested, exact) | AI (judgement, language) |
 |---|---|

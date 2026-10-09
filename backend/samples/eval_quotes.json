@@ -1,0 +1,14 @@
+{
+  "_label": "EVALUATION SET. Fictional quotations that, with the three in society.json, make six known-answer cases (two GREEN, two AMBER, two RED). Not shown in the demo.",
+  "quotes": [
+    {"vendor": "Harit Power Systems Pvt Ltd", "slug": "eval_harit", "capacity_kw": 36, "total_price_inr": 1820000, "advance_pct": 10,
+     "warranty_panel_years": 25, "service_years": 5, "expected_verdict": "GREEN",
+     "expected_flags": []},
+    {"vendor": "Prakash Solar Solutions", "slug": "eval_prakash", "capacity_kw": 36, "total_price_inr": 2340000, "advance_pct": 30,
+     "warranty_panel_years": 25, "service_years": 5, "expected_verdict": "AMBER",
+     "expected_flags": ["PRICE_HIGH", "ADVANCE_HIGH", "PRESSURE"]},
+    {"vendor": "Roshni Electricals", "slug": "eval_roshni", "capacity_kw": 36, "total_price_inr": null, "advance_pct": 15,
+     "warranty_panel_years": null, "service_years": 2, "expected_verdict": "RED",
+     "expected_flags": ["PRICE_MISSING", "VENDOR_NOT_VERIFIED", "WARRANTY_MISSING", "SERVICE_SHORT"]}
+  ]
+}

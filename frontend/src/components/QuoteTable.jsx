@@ -20,7 +20,8 @@ function PriceBand({ price, band, color }) {
   )
 }
 
-export default function QuoteTable({ audits, band, rulebook, goTo }) {
+export default function QuoteTable({ audits, band, rulebook, goTo, review, stale }) {
+  const notes = Object.fromEntries((review?.review?.vendor_notes || []).map((n) => [n.vendor.toLowerCase(), n]))
   if (!audits.length) {
     return (
       <div className="folder-body">
@@ -44,6 +45,13 @@ export default function QuoteTable({ audits, band, rulebook, goTo }) {
               </header>
               {band && a.price_per_kw && <PriceBand price={a.price_per_kw} band={band} color={v.c} />}
               <p className="verdict-line"><b>{v.t}.</b> {a.vendor_check?.found_in_list ? 'On the loaded vendor list.' : 'Not found on the loaded vendor list.'}</p>
+              {notes[a.vendor.toLowerCase()] && (
+                <div className={'agent-note' + (stale ? ' stale' : '')}>
+                  <span className="who">Auditor (AI){stale ? ' · out of date' : ''}</span>
+                  <p>{notes[a.vendor.toLowerCase()].explanation}</p>
+                  <p><b>Ask them:</b> {notes[a.vendor.toLowerCase()].question}</p>
+                </div>
+              )}
               <ul className="flags">
                 {a.flags.length === 0 && <li className="ok">No flags found.</li>}
                 {a.flags.map((f, i) => (

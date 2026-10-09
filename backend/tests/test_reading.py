@@ -29,6 +29,17 @@ def test_quotes_are_read_and_audited_like_the_sample(q):
     assert f["payment_terms_text"].lower().startswith(f"{q['advance_pct']:.0f}% advance")      # the real terms, not the tagline
     assert quotes.audit_quote(f)["verdict"] == SAMPLE["_expected"]["audit_verdicts"][q["vendor"]]
 
+EVAL = __import__("json").loads((PDFS.parent / "eval_quotes.json").read_text(encoding="utf-8"))["quotes"]
+
+@pytest.mark.parametrize("q", EVAL, ids=lambda q: q["slug"])
+def test_evaluation_quotes_get_the_known_verdict_and_flags(q):
+    f = read("quote", f"quote_{q['slug']}.pdf")["fields"]
+    for k in ("vendor", "capacity_kw", "total_price_inr", "advance_pct", "warranty_panel_years", "service_years"):
+        assert f[k] == q[k], k
+    audit = quotes.audit_quote(f)
+    assert audit["verdict"] == q["expected_verdict"]
+    assert sorted(x["code"] for x in audit["flags"]) == sorted(q["expected_flags"])
+
 def test_hidden_instruction_is_extracted_so_the_auditor_sees_it():
     f = read("quote", "quote_sasta.pdf")["fields"]
     assert quotes.scan_for_injection(f["raw_text"])

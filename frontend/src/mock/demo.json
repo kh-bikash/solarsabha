@@ -3,12 +3,12 @@
   "id": "demo000000",
   "schema": 2,
   "sample": true,
-  "created_at": "2026-10-09T15:36:42+00:00",
-  "updated_at": "2026-10-09T15:36:42+00:00",
-  "expires_at": 1823096202.142701,
+  "created_at": "2026-10-09T16:04:50+00:00",
+  "updated_at": "2026-10-09T16:04:50+00:00",
+  "expires_at": 1823097890.6486702,
   "consent": {
    "sample_data": true,
-   "at": "2026-10-09T15:36:42+00:00"
+   "at": "2026-10-09T16:04:50+00:00"
   },
   "inputs": {
    "society": {
@@ -161,7 +161,7 @@
   "draft_state": {},
   "audit": [
    {
-    "at": "2026-10-09T15:36:42+00:00",
+    "at": "2026-10-09T16:04:50+00:00",
     "actor": "Meera (sample)",
     "action": "created project",
     "detail": "sample data"
@@ -775,112 +775,112 @@
      "output": "Unclear values in: 2026-09. Asking the committee to confirm."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": "size_system",
      "input": "{'annual_kwh': 60000, 'flats': 50, 'share': 0.85, 'yield_kwh_per_kw': 1400}",
      "output": "{'options': [{'label': 'small', 'share_of_load': 0.6, 'kw': 26}, {'label': 'recommended', 'share_of_load': 0.85, 'kw': 36}, {'label': 'large', 'share_of_load': 1.0, 'kw': 43}], 'recommended_kw': 36, 'subsidy_ceiling_k..."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": "money_summary",
      "input": "{'kw': 26, 'cost_per_kw': 50000, 'tariff': 7, 'yield_kwh_per_kw': 1400}",
      "output": "{'kw': 26, 'total_cost': 1300000, 'subsidy': 468000, 'net_cost': 832000, 'generation_kwh_year': 36400, 'saving_per_year': 254800, 'payback_years': 3.3, 'co2_tonnes_year': 25.8, 'assumptions': {'cost_per_kw': 50000, 't..."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": "money_summary",
      "input": "{'kw': 36, 'cost_per_kw': 50000, 'tariff': 7, 'yield_kwh_per_kw': 1400}",
      "output": "{'kw': 36, 'total_cost': 1800000, 'subsidy': 648000, 'net_cost': 1152000, 'generation_kwh_year': 50400, 'saving_per_year': 352800, 'payback_years': 3.3, 'co2_tonnes_year': 35.8, 'assumptions': {'cost_per_kw': 50000, '..."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": "money_summary",
      "input": "{'kw': 43, 'cost_per_kw': 50000, 'tariff': 7, 'yield_kwh_per_kw': 1400}",
      "output": "{'kw': 43, 'total_cost': 2150000, 'subsidy': 774000, 'net_cost': 1376000, 'generation_kwh_year': 60200, 'saving_per_year': 421400, 'payback_years': 3.3, 'co2_tonnes_year': 42.7, 'assumptions': {'cost_per_kw': 50000, '..."
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Auditor",
      "tool": "audit_quote",
      "input": "{'q': {'vendor': 'Suryakiran Rooftop Solar Pvt Ltd', 'capacity_kw': 36, 'total_price_inr': 1750000, 'advance_pct': 10, 'warranty_panel_years': 25, 'service_years': 5, 'payment_terms_text': '10% advance, 60% on deliver...",
      "output": "{'vendor': 'Suryakiran Rooftop Solar Pvt Ltd', 'price_per_kw': 48611, 'vendor_check': {'vendor': 'Suryakiran Rooftop Solar Pvt Ltd', 'found_in_list': True, 'label': 'SAMPLE vendor list. Verify on the official portal.'..."
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Auditor",
      "tool": null,
      "input": null,
      "output": "Suryakiran Rooftop Solar Pvt Ltd: GREEN (0 flag(s))"
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Auditor",
      "tool": "audit_quote",
      "input": "{'q': {'vendor': 'Sasta Sun Traders', 'capacity_kw': 36, 'total_price_inr': 1400000, 'advance_pct': 20, 'warranty_panel_years': None, 'service_years': None, 'payment_terms_text': '20% advance on signing.', 'offer_text...",
      "output": "{'vendor': 'Sasta Sun Traders', 'price_per_kw': 38889, 'vendor_check': {'vendor': 'Sasta Sun Traders', 'found_in_list': False, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [{'level': 'amber..."
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Auditor",
      "tool": null,
      "input": null,
      "output": "Sasta Sun Traders: RED (5 flag(s))"
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Auditor",
      "tool": "audit_quote",
      "input": "{'q': {'vendor': 'Urja Prime Energy LLP', 'capacity_kw': 36, 'total_price_inr': 1900000, 'advance_pct': 50, 'warranty_panel_years': 25, 'service_years': 1, 'payment_terms_text': '50% advance before DISCOM approval.', ...",
      "output": "{'vendor': 'Urja Prime Energy LLP', 'price_per_kw': 52778, 'vendor_check': {'vendor': 'Urja Prime Energy LLP', 'found_in_list': True, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [{'level':..."
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Auditor",
      "tool": null,
      "input": null,
      "output": "Urja Prime Energy LLP: AMBER (4 flag(s))"
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Secretary",
      "tool": "run_simulated_negotiation",
      "input": "{'quote': {'vendor': 'Suryakiran Rooftop Solar Pvt Ltd', 'capacity_kw': 36, 'total_price_inr': 1750000, 'advance_pct': 10, 'warranty_panel_years': 25, 'service_years': 5, 'payment_terms_text': '10% advance, 60% on del...",
      "output": "{'vendor': 'Suryakiran Rooftop Solar Pvt Ltd', 'simulated': True, 'skipped': False, 'start_price': 1750000, 'final_price': 1642812, 'final_advance_pct': 5, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'counter..."
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Secretary",
      "tool": "run_simulated_negotiation",
      "input": "{'quote': {'vendor': 'Sasta Sun Traders', 'capacity_kw': 36, 'total_price_inr': 1400000, 'advance_pct': 20, 'warranty_panel_years': None, 'service_years': None, 'payment_terms_text': '20% advance on signing.', 'offer_...",
      "output": "{'vendor': 'Sasta Sun Traders', 'simulated': True, 'skipped': True, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'request_proof', 'price': None, 'message': 'Before we discuss price, please share proof of your ..."
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Secretary",
      "tool": "run_simulated_negotiation",
      "input": "{'quote': {'vendor': 'Urja Prime Energy LLP', 'capacity_kw': 36, 'total_price_inr': 1900000, 'advance_pct': 50, 'warranty_panel_years': 25, 'service_years': 1, 'payment_terms_text': '50% advance before DISCOM approval...",
      "output": "{'vendor': 'Urja Prime Energy LLP', 'simulated': True, 'skipped': False, 'start_price': 1900000, 'final_price': 1795728, 'final_advance_pct': 35, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'counter', 'price'..."
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Secretary",
      "tool": "fairness_table",
      "input": "{'net_cost': 1152000, 'saving_per_year': 352800, 'flat_areas_sqft': {'A-101': 900, 'A-102': 900, 'A-201': 1100, 'A-202': 1100, 'B-101': 1400, 'B-102': 1400}, 'total_flats': 50}",
      "output": "{'models': ['equal', 'by_area'], 'flats': [{'flat': 'A-101', 'area_sqft': 900, 'equal_cost': 23040, 'area_cost': 18296, 'equal_saving_year': 7056, 'area_saving_year': 5603}, {'flat': 'A-102', 'area_sqft': 900, 'equal_..."
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Chaser",
      "tool": "build_timeline",
      "input": "{'events': [{'stage': 'AGM', 'done_day': 7}, {'stage': 'PORTAL', 'done_day': 9}], 'today_day': 10}",
      "output": "[{'key': 'AGM', 'label': 'Society decision (AGM)', 'min_days': 5, 'max_days': 7, 'status': 'DONE', 'start_day': 0, 'done_day': 7}, {'key': 'PORTAL', 'label': 'Apply on portal', 'min_days': 1, 'max_days': 2, 'status': ..."
     },
     {
-     "t": 0.001,
+     "t": 0.002,
      "agent": "Secretary",
      "tool": null,
      "input": null,
@@ -1127,6 +1127,7 @@
     "message": "National rules apply. No state-specific rules are loaded yet; confirm local procedures with your DISCOM."
    },
    "reader_mode": "offline",
+   "review_stale": false,
    "clock": {
     "started_on": "2026-09-29",
     "today_day": 10,
@@ -1219,12 +1220,12 @@
   "id": "demo000000",
   "schema": 2,
   "sample": true,
-  "created_at": "2026-10-09T15:36:42+00:00",
-  "updated_at": "2026-10-09T15:36:42+00:00",
-  "expires_at": 1823096202.142701,
+  "created_at": "2026-10-09T16:04:50+00:00",
+  "updated_at": "2026-10-09T16:04:50+00:00",
+  "expires_at": 1823097890.6486702,
   "consent": {
    "sample_data": true,
-   "at": "2026-10-09T15:36:42+00:00"
+   "at": "2026-10-09T16:04:50+00:00"
   },
   "inputs": {
    "society": {
@@ -1377,7 +1378,7 @@
   "draft_state": {},
   "audit": [
    {
-    "at": "2026-10-09T15:36:42+00:00",
+    "at": "2026-10-09T16:04:50+00:00",
     "actor": "Meera (sample)",
     "action": "created project",
     "detail": "sample data"
@@ -1999,14 +2000,14 @@
      "output": "Unclear values in: 2026-09. Asking the committee to confirm."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": "size_system",
      "input": "{'annual_kwh': 60000, 'flats': 50, 'share': 0.85, 'yield_kwh_per_kw': 1400}",
      "output": "{'options': [{'label': 'small', 'share_of_load': 0.6, 'kw': 26}, {'label': 'recommended', 'share_of_load': 0.85, 'kw': 36}, {'label': 'large', 'share_of_load': 1.0, 'kw': 43}], 'recommended_kw': 36, 'subsidy_ceiling_k..."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": "money_summary",
      "input": "{'kw': 26, 'cost_per_kw': 50000, 'tariff': 7, 'yield_kwh_per_kw': 1400}",
@@ -2358,6 +2359,7 @@
     "message": "National rules apply. No state-specific rules are loaded yet; confirm local procedures with your DISCOM."
    },
    "reader_mode": "offline",
+   "review_stale": false,
    "clock": {
     "started_on": "2026-09-29",
     "today_day": 50,
@@ -2458,12 +2460,12 @@
   "id": "demo000000",
   "schema": 2,
   "sample": true,
-  "created_at": "2026-10-09T15:36:42+00:00",
-  "updated_at": "2026-10-09T15:36:42+00:00",
-  "expires_at": 1823096202.142701,
+  "created_at": "2026-10-09T16:04:50+00:00",
+  "updated_at": "2026-10-09T16:04:50+00:00",
+  "expires_at": 1823097890.6486702,
   "consent": {
    "sample_data": true,
-   "at": "2026-10-09T15:36:42+00:00"
+   "at": "2026-10-09T16:04:50+00:00"
   },
   "inputs": {
    "society": {
@@ -2616,7 +2618,7 @@
   "draft_state": {},
   "audit": [
    {
-    "at": "2026-10-09T15:36:42+00:00",
+    "at": "2026-10-09T16:04:50+00:00",
     "actor": "Meera (sample)",
     "action": "created project",
     "detail": "sample data"
@@ -3328,77 +3330,77 @@
      "output": "Sasta Sun Traders: RED (5 flag(s))"
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Auditor",
      "tool": "audit_quote",
      "input": "{'q': {'vendor': 'Urja Prime Energy LLP', 'capacity_kw': 36, 'total_price_inr': 1900000, 'advance_pct': 50, 'warranty_panel_years': 25, 'service_years': 1, 'payment_terms_text': '50% advance before DISCOM approval.', ...",
      "output": "{'vendor': 'Urja Prime Energy LLP', 'price_per_kw': 52778, 'vendor_check': {'vendor': 'Urja Prime Energy LLP', 'found_in_list': True, 'label': 'SAMPLE vendor list. Verify on the official portal.'}, 'flags': [{'level':..."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Auditor",
      "tool": null,
      "input": null,
      "output": "Urja Prime Energy LLP: AMBER (4 flag(s))"
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": "run_simulated_negotiation",
      "input": "{'quote': {'vendor': 'Suryakiran Rooftop Solar Pvt Ltd', 'capacity_kw': 36, 'total_price_inr': 1750000, 'advance_pct': 10, 'warranty_panel_years': 25, 'service_years': 5, 'payment_terms_text': '10% advance, 60% on del...",
      "output": "{'vendor': 'Suryakiran Rooftop Solar Pvt Ltd', 'simulated': True, 'skipped': False, 'start_price': 1750000, 'final_price': 1642812, 'final_advance_pct': 5, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'counter..."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": "run_simulated_negotiation",
      "input": "{'quote': {'vendor': 'Sasta Sun Traders', 'capacity_kw': 36, 'total_price_inr': 1400000, 'advance_pct': 20, 'warranty_panel_years': None, 'service_years': None, 'payment_terms_text': '20% advance on signing.', 'offer_...",
      "output": "{'vendor': 'Sasta Sun Traders', 'simulated': True, 'skipped': True, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'request_proof', 'price': None, 'message': 'Before we discuss price, please share proof of your ..."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": "run_simulated_negotiation",
      "input": "{'quote': {'vendor': 'Urja Prime Energy LLP', 'capacity_kw': 36, 'total_price_inr': 1900000, 'advance_pct': 50, 'warranty_panel_years': 25, 'service_years': 1, 'payment_terms_text': '50% advance before DISCOM approval...",
      "output": "{'vendor': 'Urja Prime Energy LLP', 'simulated': True, 'skipped': False, 'start_price': 1900000, 'final_price': 1795728, 'final_advance_pct': 35, 'rounds': [{'round': 1, 'from': 'committee', 'kind': 'counter', 'price'..."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": "fairness_table",
      "input": "{'net_cost': 1152000, 'saving_per_year': 352800, 'flat_areas_sqft': {'A-101': 900, 'A-102': 900, 'A-201': 1100, 'A-202': 1100, 'B-101': 1400, 'B-102': 1400}, 'total_flats': 50}",
      "output": "{'models': ['equal', 'by_area'], 'flats': [{'flat': 'A-101', 'area_sqft': 900, 'equal_cost': 23040, 'area_cost': 18296, 'equal_saving_year': 7056, 'area_saving_year': 5603}, {'flat': 'A-102', 'area_sqft': 900, 'equal_..."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Chaser",
      "tool": "build_timeline",
      "input": "{'events': [{'stage': 'AGM', 'done_day': 7}, {'stage': 'PORTAL', 'done_day': 9}], 'today_day': 50}",
      "output": "[{'key': 'AGM', 'label': 'Society decision (AGM)', 'min_days': 5, 'max_days': 7, 'status': 'DONE', 'start_day': 0, 'done_day': 7}, {'key': 'PORTAL', 'label': 'Apply on portal', 'min_days': 1, 'max_days': 2, 'status': ..."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": null,
      "input": null,
      "output": "Drafted 5 papers for the committee: AGM notice, resolution and vendor letters. Nothing is sent."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Chaser",
      "tool": null,
      "input": null,
      "output": "DISCOM feasibility is 16 days overdue. Drafted an escalation. Waiting for a human to approve."
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Chaser",
      "tool": "classify_reply",
      "input": "{'text': 'Subject: Feasibility query. The sanctioned load for the common meter is insufficient for this capacity. Maximum permissible solar is 25 kW. Please revise.'}",
      "output": "{'type': 'LOAD_LIMIT', 'max_kw': 25.0}"
     },
     {
-     "t": 0.0,
+     "t": 0.001,
      "agent": "Secretary",
      "tool": "replan_for_load_limit",
      "input": "{'annual_kwh': 60000, 'flats': 50, 'max_kw': 25.0}",
@@ -3645,6 +3647,7 @@
     "message": "National rules apply. No state-specific rules are loaded yet; confirm local procedures with your DISCOM."
    },
    "reader_mode": "offline",
+   "review_stale": false,
    "clock": {
     "started_on": "2026-09-29",
     "today_day": 50,

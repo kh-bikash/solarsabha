@@ -1,9 +1,10 @@
 """Accuracy scoreboard. Show the printed score in the demo video.
 
 --mode offline (default, no AWS): the plain-code tools against known answers, and the offline text reader on all
-               15 specimen PDFs (12 bills, 3 quotes).
+               18 specimen PDFs (12 bills, 3 demo quotations, 3 evaluation quotations: 2 green, 2 amber, 2 red in all).
 --mode live    also runs the Bedrock Reader agent on the same PDFs (needs BEDROCK_MODEL_ID and model access)."""
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -17,6 +18,7 @@ ap = argparse.ArgumentParser(); ap.add_argument("--mode", choices=["offline", "l
 inp = load_sample_inputs(); ok = total = 0
 PDFS = ROOT / "backend/samples/pdfs"
 SLUG = {"Suryakiran Rooftop Solar Pvt Ltd": "suryakiran", "Sasta Sun Traders": "sasta", "Urja Prime Energy LLP": "urjaprime"}
+EVAL = json.loads((ROOT / "backend/samples/eval_quotes.json").read_text(encoding="utf-8"))["quotes"]
 QUOTE_FIELDS = ["capacity_kw", "total_price_inr", "advance_pct", "warranty_panel_years", "service_years"]
 
 def check(name, cond):
@@ -42,6 +44,13 @@ def score_reader(label, read_bill, read_quote):
         check(f"{label}: quote {q['vendor']} fields", all(got.get(k) == q.get(k) for k in QUOTE_FIELDS))
         check(f"{label}: quote {q['vendor']} verdict from the PDF",
               quotes.audit_quote({**got, "vendor": q["vendor"]})["verdict"] == inp["_expected"]["audit_verdicts"][q["vendor"]])
+
+    for q in EVAL:
+        got = read_quote(PDFS / f"quote_{q['slug']}.pdf")
+        audit = quotes.audit_quote({**got, "vendor": q["vendor"]})
+        check(f"{label}: eval quote {q['vendor']} fields", all(got.get(k) == q.get(k) for k in QUOTE_FIELDS))
+        check(f"{label}: eval quote {q['vendor']} verdict {q['expected_verdict']} with the expected flags",
+              audit["verdict"] == q["expected_verdict"] and sorted(f["code"] for f in audit["flags"]) == sorted(q["expected_flags"]))
 
 def offline(kind):
     return lambda p: reading.read_document(kind, p.read_bytes(), "application/pdf")["fields"]

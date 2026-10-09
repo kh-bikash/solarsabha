@@ -177,10 +177,45 @@ QUOTES = {
     },
 }
 
+EVAL_QUOTES = {
+    "Harit Power Systems Pvt Ltd": {
+        "slug": "eval_harit", "ref": "HPS/Q/26-27/041", "addr": "Unit 12, Green Tech Park, Suryanagar 400 708",
+        "contact": "quotes@harit.example | +91 90000 44444", "gstin": "27AAHCH0000D1Z0 (specimen)",
+        "reg": "Registered vendor, PM Surya Ghar national portal (Reg. No. PMSG-SPEC-1180)",
+        "items": [("Solar PV modules, 540 Wp mono PERC (67 nos, 36.18 kWp)", "ALMM listed", "67", 1010000),
+                  ("On-grid inverter, 36 kW three-phase", "IEC certified", "1", 280000),
+                  ("Mounting structure, cabling, protection and earthing", "As per IS", "1 lot", 390000),
+                  ("Installation, commissioning and net-meter liaison", "", "1 job", 140000)],
+        "terms": ["Payment terms: 10% advance with work order, 70% on delivery, 20% after commissioning.",
+                  "Panel warranty: 25 years.", "Free O&M service: 5 years (comprehensive maintenance contract)."],
+    },
+    "Prakash Solar Solutions": {
+        "slug": "eval_prakash", "ref": "PSS/2026/Q-77", "addr": "2nd Floor, Lake View Arcade, Suryanagar 400 704",
+        "contact": "info@prakashsolar.example | +91 90000 55555", "gstin": "27AAKFP0000E1Z0 (specimen)",
+        "reg": "Registered vendor, PM Surya Ghar national portal (Reg. No. PMSG-SPEC-1324)",
+        "items": [("Premium solar PV modules, 580 Wp TOPCon (62 nos, 35.96 kWp)", "Premium make", "62", 1450000),
+                  ("Hybrid-ready inverter, 36 kW", "Premium make", "1", 420000),
+                  ("Designer elevated structure", "As per site", "1 lot", 310000),
+                  ("Installation and commissioning", "", "1 job", 160000)],
+        "terms": ["Payment terms: 30% advance with order, balance on installation.",
+                  "Panel warranty: 25 years.", "Free O&M service: 5 years.",
+                  "Festive price: book now, offer valid this week only."],
+    },
+    "Roshni Electricals": {
+        "slug": "eval_roshni", "ref": "RE/26/112", "addr": "Near Bus Stand, Old Market, Suryanagar 400 702",
+        "contact": "roshni.electricals@mail.example | +91 90000 66666", "gstin": "27AAGFR0000F1Z0 (specimen)", "reg": None,
+        "no_total": True,
+        "items": [("Solar system 36 kW with panels, inverter and structure", "", "1 set", None),
+                  ("Wiring and installation", "", "1 job", None)],
+        "terms": ["Price: on request after site visit.", "Payment terms: 15% advance to book the material.", "Service: 2 years."],
+    },
+}
+
 def write_quote(q, society):
-    meta = QUOTES[q["vendor"]]
-    total = sum(i[3] for i in meta["items"])
-    assert total == q["total_price_inr"], f"{q['vendor']}: items add up to {total}, society.json says {q['total_price_inr']}"
+    meta = QUOTES.get(q["vendor"]) or EVAL_QUOTES[q["vendor"]]
+    total = None if meta.get("no_total") else sum(i[3] for i in meta["items"])
+    if total is not None:
+        assert total == q["total_price_inr"], f"{q['vendor']}: items add up to {total}, the sample says {q['total_price_inr']}"
     story = [Paragraph(q["vendor"], S["h1"]),
              Paragraph("Design - Supply - Installation - Service of grid-connected rooftop solar", S["s"]),
              Paragraph(f"{meta['addr']} | {meta['contact']} | GSTIN {meta['gstin']}", S["s"])]
@@ -196,12 +231,12 @@ def write_quote(q, society):
               Paragraph("Dear Sir/Madam, with reference to your enquiry, we are pleased to submit our offer as under.", S["b"]),
               Spacer(1, 6),
               Table([["Sr.", "Description", "Make / Spec", "Qty", "Amount (Rs)"]] +
-                    [[str(i + 1), Paragraph(escape(d), S["b"]), mk, qty, inr(a, 0)] for i, (d, mk, qty, a) in enumerate(meta["items"])] +
-                    [["", "Total amount (inclusive of GST)", "", "", inr(total, 0)]],
+                    [[str(i + 1), Paragraph(escape(d), S["b"]), mk, qty, inr(a, 0) if a else "-"] for i, (d, mk, qty, a) in enumerate(meta["items"])] +
+                    ([["", "Total amount (inclusive of GST)", "", "", inr(total, 0)]] if total else []),
                     colWidths=[10 * mm, 92 * mm, 30 * mm, 18 * mm, 30 * mm],
                     style=GRID.getCommands() + [("ALIGN", (4, 0), (4, -1), "RIGHT"), ("FONT", (0, -1), (-1, -1), "Helvetica-Bold", 9)]),
               Spacer(1, 6),
-              Paragraph(f"<b>Total amount (inclusive of GST): Rs {inr(total, 0)}</b>", S["b"]),
+              Paragraph(f"<b>Total amount (inclusive of GST): Rs {inr(total, 0)}</b>" if total else "<b>Price to be confirmed after site visit.</b>", S["b"]),
               Spacer(1, 8), Paragraph("Terms and conditions", S["h2"])]
     story += [Paragraph(f"{i + 1}. {escape(t)}", S["b"]) for i, t in enumerate(meta["terms"])]
     story += [Spacer(1, 4),
@@ -228,6 +263,8 @@ def main():
         reading += int(b["units_kwh"])
         hist.append((f"{MONTHS[m - 1]}-{y % 100:02d}", int(b["units_kwh"])))
     for q in data["quotes"]:
+        write_quote(q, society)
+    for q in json.loads((ROOT / "backend/samples/eval_quotes.json").read_text(encoding="utf-8"))["quotes"]:
         write_quote(q, society)
     SAMPLE.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print("wrote", len(list(OUT.glob("*.pdf"))), "specimen PDFs to", OUT, "and synced bill amounts into society.json")

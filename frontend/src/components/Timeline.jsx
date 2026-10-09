@@ -40,6 +40,8 @@ export default function Timeline({ r, project, session, canEdit, onSaved, notify
           : n.stage ? <>Next up: <b>{n.label}</b>. The Chaser sleeps with an alarm set, and wakes when it is due or when a reply arrives.</>
           : <>Every stage is done.</>}
       </p>
+      {project.reply_reading && <p className="agent-note"><span className="who">Chaser (AI) read the DISCOM’s reply</span>{project.reply_reading.summary}</p>}
+      {project.review?.review?.next_step && <p className={'agent-note' + (r.review_stale ? ' stale' : '')}><span className="who">Chaser (AI){r.review_stale ? ' · out of date' : ''}</span>{project.review.review.next_step}</p>}
       <div className="track">
         {segs.map((s) => (
           <React.Fragment key={s.key}>

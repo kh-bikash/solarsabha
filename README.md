@@ -6,6 +6,9 @@ Built for WeMakeDevs × AWS *Environmental Hacks, Bharat Builds Tour 2026*, **Tr
 [![CI](https://github.com/kh-bikash/solarsabha/actions/workflows/ci.yml/badge.svg)](https://github.com/kh-bikash/solarsabha/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue) ![React 18](https://img.shields.io/badge/react-18-blue) ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
+**Live app: https://main.d2vnrqt0vyz925.amplifyapp.com** (AWS Amplify, API Gateway, Lambda, DynamoDB, S3 and EventBridge Scheduler, Mumbai region).
+Open the sample society, or start your own and upload the specimen bills from [`backend/samples/pdfs`](backend/samples/pdfs).
+
 ![The SolarSabha office: four agents at work, the committee's desk in front](docs/screenshots/03-office.jpg)
 
 ## The problem
@@ -89,8 +92,13 @@ flowchart TB
 ```
 
 Agents (Strands Agents SDK on Amazon Bedrock) read, explain and draft. **Ordinary, tested code does every calculation and
-every rule check.** The Planner is deliberately not an agent. The same tools are also exposed through our own
-**SolarRules MCP server**.
+every rule check.** The Planner is deliberately not an agent. The shared rules and calculators are served by our own
+**SolarRules MCP server**, which the agents use when it is available.
+
+In live mode, **Ask the agents to review** runs the Secretary, which calls the Auditor and the Chaser as tools. Their real
+tool calls replay in the office and the Logbook; the Auditor's explanation and a question for each vendor appear on the
+quote cards; the Chaser's advice appears in the Timeline. The Chaser also reads messy DISCOM emails, and
+**Polish (AI)** rewords letters, rejected automatically if any number, date or reference changes.
 
 ### How an agent waits three weeks
 
@@ -132,6 +140,7 @@ More diagrams (project stages, data model): [docs/ARCHITECTURE.md](docs/ARCHITEC
 |---|---|
 | AI reads and writes; code calculates | sizing, money, CO2, audit flags and timeline are plain functions with tests |
 | Documents are data, never instructions | hidden text is extracted and scanned; an instruction-like phrase turns the quote red |
+| Agents only use their own tools | a Strands hook cancels any tool call outside the agent's allowlist and logs it |
 | Draft only | there is no send, sign, pay or file function in the codebase |
 | Named approvals | approvals record who and when, and are withdrawn if the letter changes |
 | Cite the rulebook | every rule shows its value, source, status (official, verify, our assumption) and date |
@@ -172,9 +181,10 @@ Try it with the specimen documents in `backend/samples/pdfs/` (12 bills, 3 quota
 
 | Check | Command | Result |
 |---|---|---|
-| Backend unit + API tests (reader, pipeline, roles, privacy, alarms, wake-up) | `make test` | 56 passing |
-| Frontend tests (Vitest) | `make test-ui` | 31 passing |
-| Accuracy scoreboard: tools + offline reader on all 15 specimen PDFs | `make evals` | 24/24 |
+| Backend unit + API tests (reader, pipeline, roles, privacy, alarms, wake-up, live agents with fake models) | `make test` | 68 passing |
+| Frontend tests (Vitest) | `make test-ui` | 32 passing |
+| Accuracy scoreboard: tools + offline reader on 18 specimen PDFs (12 bills, 6 quotations: 2 green, 2 amber, 2 red) | `make evals` | 30/30 |
+| Deployed API smoke test (S3 upload and read, Word, alarm created and removed) and a browser run on the live site | manual | passing |
 | AWS template lint | `make lint-infra` | clean |
 | Everything CI runs | `make check` | GitHub Actions on every push |
 
@@ -190,6 +200,7 @@ Every `/projects/{id}` route needs `x-project-key`; routes that change data also
 | `POST /projects/{id}/documents` · `GET`/`DELETE /projects/{id}/documents/{did}` | upload and read, original, delete |
 | `PUT /projects/{id}/drafts/{did}` · `POST .../approve` · `GET .../docx` | edit, approve, Word download |
 | `POST /projects/{id}/discom-reply` · `POST .../advance` · `POST .../clock/reset` | DISCOM reply; simulated clock |
+| `POST /projects/{id}/review` · `POST .../drafts/{did}/polish` | live mode: the agents' review; AI rewording with a facts check |
 | `GET /rules` · `GET /health` | rulebook and states; liveness |
 
 ## Repository
@@ -218,9 +229,9 @@ docs/                architecture, privacy, rulebook verification, AWS setup, de
 
 | Part | Status |
 |---|---|
-| Projects, uploads, offline reading, plan, audit, letters, approvals, timeline, roles, privacy controls | Working and tested locally |
-| AWS template (DynamoDB, S3, Lambdas, Scheduler alarms) | Lint-clean; deploy with `make deploy` |
-| Live Bedrock Reader and Strands agents | In the code; our new AWS account is still restricted from Bedrock, so recordings use the offline reader and say so |
+| Projects, uploads, offline reading, plan, audit, letters, approvals, timeline, roles, privacy controls | Working and tested |
+| AWS deployment: Amplify site, API Gateway, Lambdas, DynamoDB, S3, Scheduler alarms | **Live** (link above) and smoke-tested |
+| Live agents: Secretary calling Auditor and Chaser, Reader on photos, AI reply reading, polishing | Built, tested with fake models, and run against the real Bedrock API. Our new AWS account is still restricted from Bedrock ("Operation not allowed" on the Free plan), so the deployment runs in offline mode and says so on screen. Switch on with `ReaderMode=live` |
 | Vendor replies, the sample DISCOM reply, the time machine, the vendor list | Simulated or sample data, labelled on screen |
 | State-specific rules | Special-category subsidy loaded; other state rules are added only when verified |
 | Identity | Per-project keys and roles; add Cognito for verified sign-in |

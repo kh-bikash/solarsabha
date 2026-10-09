@@ -92,5 +92,7 @@ export const api = {
     const a = Object.assign(document.createElement('a'), { href: url, download: `solarsabha-${s.id}.json` })
     document.body.appendChild(a); a.click(); a.remove()
   },
+  review: (s) => (MODE === 'MOCK' ? readOnly() : call(s, 'POST', `/projects/${s.id}/review`, {})),
+  polishDraft: (s, id) => (MODE === 'MOCK' ? readOnly() : call(s, 'POST', `/projects/${s.id}/drafts/${id}/polish`, {})),
   deleteProject: (s, confirmName) => (MODE === 'MOCK' ? readOnly() : call(s, 'DELETE', `/projects/${s.id}`, { confirm_name: confirmName })),
 }

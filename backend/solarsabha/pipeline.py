@@ -32,13 +32,14 @@ def bill_average_rate(bills) -> float | None:
     return round(sum(a for a, _ in pairs) / sum(u for _, u in pairs), 2) if pairs else None
 
 def run_offline(inputs: dict | None = None, today_day: int = 0, events: list | None = None,
-                discom_reply: str | None = None, assumptions: dict | None = None) -> dict:
+                discom_reply: str | None = None, assumptions: dict | None = None, reply_reading: dict | None = None) -> dict:
+    """reply_reading: the live Chaser agent's structured reading of discom_reply; without it, the rule-based reader is used."""
     inputs = inputs or load_sample_inputs()
     soc = inputs["society"]
     with rules.use_state(soc.get("state") or None):
-        return _run(inputs, soc, today_day, events, discom_reply, assumptions)
+        return _run(inputs, soc, today_day, events, discom_reply, assumptions, reply_reading)
 
-def _run(inputs, soc, today_day, events, discom_reply, assumption_overrides):
+def _run(inputs, soc, today_day, events, discom_reply, assumption_overrides, reply_reading=None):
     tr = Trace()
     bills, quote_list = inputs.get("bills") or [], inputs.get("quotes") or []
     a = resolve_assumptions(assumption_overrides)
@@ -118,9 +119,13 @@ def _run(inputs, soc, today_day, events, discom_reply, assumption_overrides):
 
     # 7. Optional DISCOM reply -> replan (Plan v1 vs v2)
     plan_v2, reply_class = None, None
-    if discom_reply:
+    if discom_reply and reply_reading:
+        reply_class = {"type": reply_reading["type"], **({"max_kw": reply_reading["max_kw"]} if reply_reading.get("max_kw") else {})}
+        tr.note("Chaser", f"Read the DISCOM reply with AI: {reply_reading.get('summary', reply_class['type'])}")
+    elif discom_reply:
         reply_class = tr.call("Chaser", "classify_reply", replan.classify_reply, text=discom_reply)
-        if reply_class["type"] == "LOAD_LIMIT" and annual:
+    if discom_reply:
+        if reply_class["type"] == "LOAD_LIMIT" and reply_class.get("max_kw") and annual:
             p2 = tr.call("Secretary", "replan_for_load_limit", replan.replan_for_load_limit,
                          annual_kwh=annual, flats=soc["flats"], max_kw=reply_class["max_kw"])
             m2 = sizing.money_summary(p2["recommended_kw"], cost_per_kw=av["cost_per_kw"], tariff=av["tariff"],

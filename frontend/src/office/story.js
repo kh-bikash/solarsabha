@@ -67,6 +67,21 @@ function say(e, k, r) {
   return `${e.tool}: ${String(e.output).slice(0, 90)}`
 }
 
+// Events from a live agent run (TraceHooks): real tool calls by the Secretary and the specialists it calls.
+const SPECIALISTS = { auditor: 'Auditor', chaser: 'Chaser', reader: 'Reader' }
+export function describeAgentRun(events) {
+  return events.map((e) => {
+    if (!e.tool) return { agent: e.agent, tool: null, object: null, code: false, flight: null, text: String(e.output || '') }
+    const out = String(e.output || '').replace(/\s+/g, ' ').trim()
+    if (SPECIALISTS[e.tool]) {
+      return { agent: e.agent, tool: e.tool, object: null, code: false, flight: null, ai: true,
+        text: `Asked the ${SPECIALISTS[e.tool]}: ${out.slice(0, 150) || 'done'}` }
+    }
+    return { agent: e.agent, tool: e.tool, object: OBJECT[e.tool] || null, code: true, flight: null, ai: true,
+      text: out.slice(0, 160) || `${e.tool} returned nothing` }
+  })
+}
+
 // What the whiteboard shows, based on the events played so far.
 export function boardItems(played, r) {
   const has = (t) => played.some((e) => e.tool === t)

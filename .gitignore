@@ -8,3 +8,6 @@ dist/
 .env
 .aws-sam/
 samconfig.toml
+
+# build artefacts
+frontend/site.zip
