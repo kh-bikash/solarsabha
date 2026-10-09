@@ -64,7 +64,8 @@ def read_quote_text(text: str) -> dict:
     warranty = _first(rf"(?:panel\s*)?warranty\D{{0,15}}{NUM}\s*(?:years?|yrs?)", text)
     service = _first(rf"(?:service|maintenance|amc|o\s*&\s*m)\D{{0,15}}{NUM}\s*(?:years?|yrs?)", text)
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+|\n", text) if s.strip()]
-    terms = " ".join(s for s in sentences if re.search(r"advance|payment|pay\b|instal", s, re.I))
+    explicit = _first(r"payment\s*terms?\s*:\s*([^\n]+)", text)
+    terms = explicit.strip() if explicit else " ".join(s for s in sentences if re.search(r"\badvance\b|\bpayment\b", s, re.I))
     offer = " ".join(s for s in sentences if re.search(r"sign today|offer ends|limited time|only today|last day|book now|act now", s, re.I))
     out = {"vendor": vendor, "capacity_kw": _num(capacity), "total_price_inr": _num(price), "advance_pct": _num(advance),
            "warranty_panel_years": _num(warranty), "service_years": _num(service),

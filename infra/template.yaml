@@ -1,23 +1,43 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: SolarSabha backend (API + state). Deploy with `sam build && sam deploy --guided` from this folder.
+Description: SolarSabha backend (API, project state, uploads, scheduled wake-up). Deploy with `sam build && sam deploy --guided` from this folder.
 
 Parameters:
   BedrockModelId:
     Type: String
     Default: ""
-    Description: Model or inference profile id enabled in your account (needed only for live agent mode).
+    Description: Model or inference profile id for the live Reader (for example an in.anthropic.* profile). Leave empty for offline reading.
+  ReaderMode:
+    Type: String
+    Default: offline
+    AllowedValues: [offline, live]
+    Description: offline = plain-rule PDF reader, no AI. live = Bedrock Reader agent (needs BedrockModelId and model access).
+  AllowedOrigin:
+    Type: String
+    Default: "*"
+    Description: The website allowed to call the API (for example https://main.xxxx.amplifyapp.com). Use the real origin in production.
+  RetentionDays:
+    Type: Number
+    Default: 365
+    MinValue: 1
+    MaxValue: 3650
+    Description: Projects and their files are deleted automatically this many days after creation.
 
 Globals:
   Function:
     Runtime: python3.12
-    Timeout: 30
-    MemorySize: 512
+    Timeout: 60
+    MemorySize: 1024
+    Architectures: [x86_64]
     Environment:
       Variables:
         STATE_BACKEND: dynamodb
         TABLE_NAME: !Ref StateTable
+        UPLOADS_BUCKET: !Ref UploadsBucket
         BEDROCK_MODEL_ID: !Ref BedrockModelId
+        READER_MODE: !Ref ReaderMode
+        ALLOWED_ORIGIN: !Ref AllowedOrigin
+        RETENTION_DAYS: !Ref RetentionDays
 
 Resources:
   StateTable:
@@ -30,28 +50,55 @@ Resources:
       KeySchema:
         - {AttributeName: pk, KeyType: HASH}
         - {AttributeName: sk, KeyType: RANGE}
+      TimeToLiveSpecification: {AttributeName: ttl, Enabled: true}
+      PointInTimeRecoverySpecification: {PointInTimeRecoveryEnabled: true}
+      SSESpecification: {SSEEnabled: true}
 
   UploadsBucket:
     Type: AWS::S3::Bucket
     Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
-      CorsConfiguration:
-        CorsRules:
-          - AllowedMethods: [PUT, GET]
-            AllowedOrigins: ['*']
-            AllowedHeaders: ['*']
+      OwnershipControls:
+        Rules: [{ObjectOwnership: BucketOwnerEnforced}]
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-with-projects          # safety net: files are normally deleted with their project
+            Status: Enabled
+            ExpirationInDays: !Ref RetentionDays
+
+  UploadsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref UploadsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: [!GetAtt UploadsBucket.Arn, !Sub '${UploadsBucket.Arn}/*']
+            Condition: {Bool: {'aws:SecureTransport': 'false'}}
 
   Api:
     Type: AWS::Serverless::HttpApi
     Properties:
       CorsConfiguration:
-        AllowOrigins: ['*']
-        AllowHeaders: ['*']
-        AllowMethods: [GET, POST, OPTIONS]
+        AllowOrigins: [!Ref AllowedOrigin]
+        AllowHeaders: [content-type, x-project-key, x-actor]
+        AllowMethods: [GET, POST, PUT, DELETE, OPTIONS]
+        ExposeHeaders: [content-disposition]
+        MaxAge: 600
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 50
+        ThrottlingRateLimit: 20
 
   ApiFunction:
     Type: AWS::Serverless::Function
@@ -60,13 +107,24 @@ Resources:
       Handler: solarsabha.handlers.api.handler
       Policies:
         - DynamoDBCrudPolicy: {TableName: !Ref StateTable}
+        - S3CrudPolicy: {BucketName: !Ref UploadsBucket}
+        - Statement:
+            - Sid: InvokeBedrockForLiveReader
+              Effect: Allow
+              Action: [bedrock:InvokeModel, bedrock:InvokeModelWithResponseStream]
+              Resource:
+                - 'arn:aws:bedrock:*::foundation-model/*'
+                - !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/*'
       Events:
         Any:
           Type: HttpApi
           Properties: {ApiId: !Ref Api, Path: '/{proxy+}', Method: ANY}
-        Root:
-          Type: HttpApi
-          Properties: {ApiId: !Ref Api, Path: '/projects', Method: ANY}
+
+  ApiLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ApiFunction}'
+      RetentionInDays: 30
 
   WakeFunction:
     Type: AWS::Serverless::Function
@@ -76,8 +134,14 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy: {TableName: !Ref StateTable}
 
-  # EventBridge Scheduler needs a role that may invoke WakeFunction. Per-project schedules are created at run time
-  # (see docs/ARCHITECTURE.md, "How the agent waits").
+  WakeLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${WakeFunction}'
+      RetentionInDays: 30
+
+  # EventBridge Scheduler assumes this role to invoke WakeFunction. Per-project one-time schedules are created
+  # at run time with input {"project_id": "<id>"} (see docs/ARCHITECTURE.md, "How the agent waits").
   SchedulerInvokeRole:
     Type: AWS::IAM::Role
     Properties:
@@ -87,6 +151,7 @@ Resources:
           - Effect: Allow
             Principal: {Service: scheduler.amazonaws.com}
             Action: sts:AssumeRole
+            Condition: {StringEquals: {'aws:SourceAccount': !Ref AWS::AccountId}}
       Policies:
         - PolicyName: invoke-wake
           PolicyDocument:
@@ -105,3 +170,5 @@ Outputs:
     Value: !Ref UploadsBucket
   SchedulerRoleArn:
     Value: !GetAtt SchedulerInvokeRole.Arn
+  WakeFunctionArn:
+    Value: !GetAtt WakeFunction.Arn

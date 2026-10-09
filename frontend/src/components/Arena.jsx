@@ -34,7 +34,7 @@ export default function Arena({ negotiations, audits }) {
           return (
             <section key={n.vendor} className="thread" style={{ '--v': VERDICT[a.verdict] }}>
               <header><b>{n.vendor}</b><span className="stamp sm">{a.verdict}</span></header>
-              <p className="mono start">{n.skipped ? 'Not negotiated: unverified vendor' : `Quoted ${lakh(n.start_price)}`}</p>
+              <p className="mono start">{n.skipped ? (n.rounds[0].kind === 'request_proof' ? 'Not negotiated: unverified vendor' : 'Not negotiated: price or size missing') : `Quoted ${lakh(n.start_price)}`}</p>
               <div className="msgs">
                 {n.rounds.map((rd, i) => visible.has(vi + ':' + i) && (
                   <div key={i} className={'msg ' + rd.from}>

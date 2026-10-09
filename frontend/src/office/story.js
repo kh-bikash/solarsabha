@@ -79,7 +79,7 @@ export function boardItems(played, r) {
     { label: 'Understand: read bills', done: has('sum_bills') },
     { label: 'Size: right kW', done: has('size_system') },
     { label: 'Decide: AGM papers', done: drafted },
-    { label: `Choose: quotes ${audits}/${r.audits.length}`, done: audits >= r.audits.length },
+    { label: `Choose: quotes ${audits}/${r.audits.length}`, done: r.audits.length > 0 && audits >= r.audits.length },
     { label: replanned ? 'Follow: plan v2' : chase ? 'Follow: escalated' : 'Follow: DISCOM', done: replanned || !!chase },
   ]
 }

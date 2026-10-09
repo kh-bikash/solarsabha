@@ -1,5 +1,6 @@
 import React from 'react'
 import { inr } from '../office/story.js'
+import { Empty, RuleCite } from './ui.jsx'
 
 const VERDICT = { GREEN: { c: '#2f8a3e', t: 'Fair and clear' }, AMBER: { c: '#c98a00', t: 'Ask questions first' }, RED: { c: '#c63a2b', t: 'Do not proceed yet' } }
 
@@ -19,7 +20,17 @@ function PriceBand({ price, band, color }) {
   )
 }
 
-export default function QuoteTable({ audits, band }) {
+export default function QuoteTable({ audits, band, rulebook, goTo }) {
+  if (!audits.length) {
+    return (
+      <div className="folder-body">
+        <Empty title="No quotations to check yet" action={<button className="btn primary" onClick={() => goTo('docs')}>Add quotations in Documents</button>}>
+          Ask three or four empanelled vendors for quotations, then upload them. The Auditor checks price per kW, the vendor list,
+          payment terms, warranty and service, and scans for hidden instructions.
+        </Empty>
+      </div>
+    )
+  }
   return (
     <div className="folder-body">
       <div className="quotes">
@@ -28,17 +39,17 @@ export default function QuoteTable({ audits, band }) {
           return (
             <article key={a.vendor} className="qcard" style={{ '--v': v.c }}>
               <header>
-                <div><h4>{a.vendor}</h4><span className="mono">{inr(a.price_per_kw)} per kW</span></div>
+                <div><h4>{a.vendor}</h4><span className="mono">{a.price_per_kw ? `${inr(a.price_per_kw)} per kW` : 'price not readable'}</span></div>
                 <span className="stamp">{a.verdict}</span>
               </header>
-              {band && <PriceBand price={a.price_per_kw} band={band} color={v.c} />}
-              <p className="verdict-line"><b>{v.t}.</b> {a.vendor_check?.found_in_list ? 'On the sample vendor list.' : 'Not found on the sample vendor list.'}</p>
+              {band && a.price_per_kw && <PriceBand price={a.price_per_kw} band={band} color={v.c} />}
+              <p className="verdict-line"><b>{v.t}.</b> {a.vendor_check?.found_in_list ? 'On the loaded vendor list.' : 'Not found on the loaded vendor list.'}</p>
               <ul className="flags">
                 {a.flags.length === 0 && <li className="ok">No flags found.</li>}
                 {a.flags.map((f, i) => (
                   <li key={i} className={f.level}>
                     <span className="lvl">{f.level}</span>{f.message}
-                    {f.rule && <code>rule: {f.rule}</code>}
+                    {f.rule && <RuleCite rule={f.rule} rulebook={rulebook} />}
                     {f.code === 'DOCUMENT_CONTAINS_INSTRUCTIONS' && <em>Treated as data. The AI took no orders from it.</em>}
                   </li>
                 ))}
@@ -47,7 +58,7 @@ export default function QuoteTable({ audits, band }) {
           )
         })}
       </div>
-      <p className="fine"><span className="tape small">Sample data</span> The vendors and the vendor list are invented for the demo. In real use the official list comes from the national portal.</p>
+      <p className="fine"><span className="tape small">Sample list</span> The vendor list loaded here is sample data. In real use, check each vendor on the national rooftop solar portal.</p>
     </div>
   )
 }

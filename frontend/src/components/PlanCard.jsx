@@ -1,5 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { api } from '../api.js'
 import { inr, lakh } from '../office/story.js'
+import { Empty, RuleCite } from './ui.jsx'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const monthName = (m) => { const [y, mo] = m.split('-'); return `${MONTHS[+mo - 1]} ${y.slice(2)}` }
@@ -55,8 +57,55 @@ function BillsChart({ bills }) {
   )
 }
 
-export default function PlanCard({ r }) {
-  const m = r.recommended, a = m.assumptions, v2 = r.plan_v2
+const ASSUME = [
+  ['tariff', 'Grid tariff', 'Rs per unit', 0.1], ['cost_per_kw', 'Installed cost', 'Rs per kW', 500],
+  ['yield_kwh_per_kw', 'Yearly generation', 'kWh per kW', 10], ['share', 'Share of use to cover', '%', 1],
+]
+
+function Assumptions({ r, canEdit, session, onSaved, notify }) {
+  const current = () => Object.fromEntries(ASSUME.map(([k]) => [k, k === 'share' ? Math.round(r.assumptions[k].value * 100) : r.assumptions[k].value]))
+  const [v, setV] = useState(current)
+  useEffect(() => setV(current()), [JSON.stringify(r.assumptions)])
+  const save = async (values) => {
+    const body = values ? Object.fromEntries(Object.entries(values).map(([k, x]) => [k, x === '' || x == null ? null : k === 'share' ? Number(x) / 100 : Number(x)])) : {}
+    try { onSaved(await api.put(session, 'assumptions', body)); notify('ok', values ? 'Assumptions saved. The plan has been recalculated.' : 'Back to the rulebook values.') }
+    catch (e) { notify('error', e.message) }
+  }
+  const committee = (k) => r.assumptions[k].source === 'committee'
+  return (
+    <div className="assume">
+      <header><b>Assumptions</b><span className="fine">{r.recommended?.assumptions.caveat}</span></header>
+      <div className="assume-grid">
+        {ASSUME.map(([k, label, unit, step]) => (
+          <label key={k} className="field">
+            <span className="field-l">{label} <span className="muted">({unit})</span></span>
+            <input type="number" step={step} value={v[k]} disabled={!canEdit} onChange={(e) => setV({ ...v, [k]: e.target.value })} />
+            <span className="field-h">{committee(k) ? 'Set by the committee' : <>From the rulebook · <RuleCite rule={r.assumptions[k].rule} rulebook={r.rulebook} /></>}</span>
+          </label>
+        ))}
+      </div>
+      {canEdit && (
+        <div className="editor-actions">
+          {r.bill_average_rate && <button className="btn ghost" onClick={() => setV({ ...v, tariff: r.bill_average_rate })}>Use your bills’ average (Rs {r.bill_average_rate})</button>}
+          {ASSUME.some(([k]) => committee(k)) && <button className="btn ghost" onClick={() => save(null)}>Reset to rulebook</button>}
+          <button className="btn primary" onClick={() => save(v)}>Recalculate</button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function PlanCard({ r, canEdit, session, onSaved, notify, goTo }) {
+  if (!r.plan) {
+    return (
+      <div className="folder-body">
+        <Empty title="No plan yet" action={<button className="btn primary" onClick={() => goTo('docs')}>Add bills in Documents</button>}>
+          The plan is sized from what your common meter actually uses. Upload or type in the last 12 months of common-area bills.
+        </Empty>
+      </div>
+    )
+  }
+  const m = r.recommended, v2 = r.plan_v2
   return (
     <div className="folder-body plan">
       <div className="plan-left">
@@ -90,12 +139,9 @@ export default function PlanCard({ r }) {
             <p>Society now pays {lakh(v2.money.net_cost)}, payback {v2.money.payback_years} yrs, {v2.money.co2_tonnes_year} t CO₂ a year.</p>
           </div>
         )}
-        <div className="sticky">
-          <b>Assumptions</b>
-          <span>Cost {inr(a.cost_per_kw)} per kW · tariff Rs {a.tariff} a unit · {a.yield_kwh_per_kw} kWh per kW a year.</span>
-          <span>{a.caveat}</span>
-        </div>
+        {r.needs?.includes('more_bills') && <p className="notice warn">Only {r.bills.length} month(s) of bills: the year is estimated. Add all 12 for a firmer plan.</p>}
       </div>
+      <div className="plan-full"><Assumptions r={r} canEdit={canEdit} session={session} onSaved={onSaved} notify={notify} /></div>
     </div>
   )
 }

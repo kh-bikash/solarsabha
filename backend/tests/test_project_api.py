@@ -128,6 +128,17 @@ def test_expired_projects_disappear(real, monkeypatch, tmp_path):
     doc = json.loads(path.read_text()); doc["expires_at"] = 1; path.write_text(json.dumps(doc))
     assert call("GET", f"/projects/{pid}", key=key)[0] == 404
 
+def test_scheduled_wake_rechecks_and_logs(tmp_path, monkeypatch):
+    monkeypatch.setenv("LOCAL_STATE_DIR", str(tmp_path))
+    from solarsabha.handlers.wake import handler as wake
+    _, d = call("POST", "/projects", {"sample": True})
+    path = tmp_path / f"{d['id']}.json"
+    doc = json.loads(path.read_text()); doc["sim_offset_days"] = 40; path.write_text(json.dumps(doc))
+    r = wake({"project_id": d["id"]})
+    assert r["ok"] and r["next_action"]["status"] == "OVERDUE"
+    assert json.loads(path.read_text())["audit"][-1]["actor"] == "Chaser (scheduled)"
+    assert wake({"project_id": "0000000000"}) == {"ok": False, "reason": "unknown or expired project"}
+
 def test_unknown_routes_and_bad_json(real):
     pid, key = real
     assert call("GET", "/nope")[0] == 404
