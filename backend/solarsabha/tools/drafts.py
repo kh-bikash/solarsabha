@@ -45,7 +45,7 @@ def agm_notice(soc, kw, total_cost, subsidy, net_cost, payback, date) -> dict:
         f"payback of about {payback} years.\n"
         "3. To decide how the cost and the savings will be shared among members: an equal share per flat, or in proportion to flat area.\n"
         f"4. To authorise the Managing Committee to apply on the national rooftop solar portal, obtain approvals from {_discom(soc)}, "
-        "and select an empanelled vendor after comparing quotations.\n"
+        "and select a vendor registered on the PM Surya Ghar National Portal after comparing quotations.\n"
         "5. Any other matter with the permission of the Chair.\n\n"
         "The figures above are estimates prepared from the society's electricity bills. They will be confirmed with vendor quotations "
         "and the DISCOM before any order is placed. Members are requested to attend. If there is no quorum, the meeting will stand "
@@ -59,7 +59,7 @@ def agm_resolution(soc, kw, method) -> dict:
         f"rooftop solar power plant of about {kw:.0f} kW for the common facilities of the society.\n\n"
         f"RESOLVED FURTHER THAT the net cost after central financial assistance, and the resulting savings, be shared among members on {basis}.\n\n"
         "RESOLVED FURTHER THAT the Managing Committee be and is hereby authorised to apply on the national rooftop solar portal, "
-        f"to obtain the required approvals from {_discom(soc)}, to invite and compare quotations from empanelled vendors, and to "
+        f"to obtain the required approvals from {_discom(soc)}, to invite and compare quotations from vendors registered on the National Portal, and to "
         "place a work order only after DISCOM feasibility approval.\n\n"
         "RESOLVED FURTHER THAT the Hon. Secretary be authorised to sign and submit all documents required for the above purpose.")
 
@@ -68,7 +68,7 @@ def rfq_email(soc, kw, vendor) -> dict:
         f"Dear Sir/Madam,\n\n{soc['name']} intends to install a grid-connected rooftop solar plant of about {kw:.0f} kW for its "
         "common facilities. Kindly send your detailed quotation, including: price per kW and total price inclusive of GST; make and "
         "specification of panels and inverter; payment stages; panel and inverter warranty; free operation and maintenance period; "
-        "proof of registration as an empanelled vendor on the national portal; and details of society projects you have completed.\n\n"
+        "proof of registration as a vendor on the PM Surya Ghar National Portal; and details of society projects you have completed.\n\n"
         + _sign(soc))
 
 def counter_offer(soc, vendor, price, advance_pct, service_years) -> dict:
@@ -83,7 +83,7 @@ def counter_offer(soc, vendor, price, advance_pct, service_years) -> dict:
 def proof_request(soc, vendor) -> dict:
     return _d("proof_request", vendor, "Documents required before we consider your quotation",
         "Dear Sir/Madam,\n\nThank you for your quotation. Before the Managing Committee can consider it, kindly send:\n\n"
-        "1. Proof of your registration as an empanelled vendor on the national rooftop solar portal.\n"
+        "1. Proof of your registration as a vendor on the PM Surya Ghar National Portal (the subsidy is paid only for registered vendors).\n"
         "2. Your GST registration certificate.\n"
         "3. Details of at least two housing society projects you have completed, with contact persons.\n"
         "4. Your panel warranty, inverter warranty and free maintenance terms, which are not stated in the quotation.\n\n"
@@ -108,4 +108,6 @@ def discom_escalation(soc, stage_label, overdue_days) -> dict:
         f"({_ref_line(soc)}). The application has remained at the '{stage_label}' stage for {overdue_days} days beyond the usual "
         "time, despite our earlier follow-up with the sub-division office.\n\n"
         "We request you to kindly look into the matter and give us a written update, with a date by which this stage will be "
-        "completed, within 7 days. Copies of our application and earlier correspondence can be provided on request.\n\n" + _sign(soc))
+        "completed, within 7 days. Copies of our application and earlier correspondence can be provided on request. If the matter "
+        "remains unresolved, we will also raise it on the PM Surya Ghar National Portal, where grievances are to be resolved within 30 days.\n\n"
+        + _sign(soc))

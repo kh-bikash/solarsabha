@@ -1,82 +1,230 @@
 # SolarSabha
 
-**The AI project manager for your society's solar roof.**
-Built for the WeMakeDevs x AWS *Environmental Hacks, Bharat Builds Tour 2026* (Track 03: Waste and Energy, rooftop solar).
+**The AI project manager for a housing society's rooftop solar.**
+Built for WeMakeDevs × AWS *Environmental Hacks, Bharat Builds Tour 2026*, **Track 03: Waste and Energy**.
 
-A housing society's rooftop solar project is not a purchase. It is a months-long process with a committee, 50 to 500 flat owners, vendors, an electricity company (DISCOM) and a government portal. SolarSabha reads the society's bills, sizes the system, audits vendor quotes for traps, drafts the meeting papers, shows what each flat pays, and keeps chasing the DISCOM for weeks. **People stay in charge: the agents read, calculate, draft and remind. They cannot send, sign, pay or file.**
+[![CI](https://github.com/kh-bikash/solarsabha/actions/workflows/ci.yml/badge.svg)](https://github.com/kh-bikash/solarsabha/actions/workflows/ci.yml)
+![Python 3.12](https://img.shields.io/badge/python-3.12-blue) ![React 18](https://img.shields.io/badge/react-18-blue) ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-Two people? Read `docs/TWO_PERSON_SPLIT.md` first. Then `docs/SolarSabha_Research_and_Learning_Guide.pdf` (plain-language guide, research, agent concepts, tech stack).
+![The SolarSabha office: four agents at work, the committee's desk in front](docs/screenshots/03-office.jpg)
+
+## The problem
+
+An apartment society pays a large electricity bill every month for lifts, water pumps and common lights. Rooftop solar
+on the terrace can cut it sharply, and under **PM Surya Ghar: Muft Bijli Yojana** the government pays **Rs 18,000 per kW**
+(Rs 19,800 in special category states) for a society's common facilities. Yet most societies never finish the project.
+
+It is not a purchase; it is a months-long process: a committee vote, 50 to 500 flat owners, vendor quotations, a
+government portal, and a DISCOM (the electricity company) that must check feasibility, fit a net meter and inspect.
+The person running it is a volunteer secretary. **Most projects die of tiredness, not of bad maths.**
+
+## What SolarSabha does
+
+It acts as a patient, well-informed project manager for the committee. People stay in charge of every decision.
+
+| Job | What happens | Who does it |
+|---|---|---|
+| **Understand** | Reads the common-meter bills (PDF or photo), flags anything unclear, lets a person correct it | Reader |
+| **Size** | Sizes the system from real use (not the subsidy ceiling): cost, subsidy, payback, CO2 | plain code |
+| **Decide** | Drafts the general body meeting notice, the resolution and who-pays-what tables | Secretary |
+| **Choose** | Audits vendor quotations against the scheme's rules and catches hidden instructions | Auditor |
+| **Follow** | Tracks the DISCOM for weeks, wakes on an alarm, drafts reminders and escalations, re-plans | Chaser |
+
+**The app can read, calculate, compare, draft and remind. It cannot send, sign, pay or file anything.** Every letter
+needs a named committee member's approval, and is downloaded and sent by a person.
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Welcome](docs/screenshots/01-welcome.jpg) **Welcome.** Open the sample society or start your own (privacy consent required). | ![Office at work](docs/screenshots/02-office-working.jpg) **The office.** Each agent's step plays as it happens; plain-code tools light up as office objects. |
+| ![Documents](docs/screenshots/20-uploaded-documents.jpg) **Documents.** Drop bills and quotations; each value is read, shown next to its file and editable. | ![Plan](docs/screenshots/04-plan.jpg) **The plan.** Sized from the bills, with every assumption's source and an editor. |
+| ![Quote audit](docs/screenshots/06-quote-audit.jpg) **Quote audit.** Red, amber, green with reasons; each flag cites its rule (text, source, status, date). | ![Who pays](docs/screenshots/07-who-pays.jpg) **Who pays.** Equal split or by flat area. |
+| ![Timeline](docs/screenshots/08-timeline.jpg) **Timeline.** Real dates, late stages in red, record progress. | ![Negotiation room](docs/screenshots/09-negotiation-room.jpg) **Negotiation room** (labelled simulation). The unverified vendor gets a proof request, not a haggle. |
+| ![Your desk](docs/screenshots/17-approved-letter.jpg) **Your desk.** Formal letters to edit, approve as a named member, and download in Word. | ![Logbook](docs/screenshots/11-logbook.jpg) **Logbook.** What the office did, and what people did. |
+| ![Time machine](docs/screenshots/13-time-machine.jpg) **Time machine** (simulated clock). The agents sleep; an alarm wakes the Chaser. | ![Escalation](docs/screenshots/14-chaser-escalation.jpg) **The Chaser wakes**, finds the DISCOM 16 days late and drafts an escalation. |
+| ![DISCOM reply](docs/screenshots/15-discom-reply.jpg) **A DISCOM reply** is pasted in; the Chaser reads it. | ![Plan v2](docs/screenshots/16-plan-v2.jpg) **Plan v2**: the DISCOM limits capacity, the plan is redone. |
+| ![Settings](docs/screenshots/12-settings.jpg) **Settings.** Members and roles, share link, export, delete. | ![Notice pinned](docs/screenshots/18-notice-pinned.jpg) **Approved notice** pinned on the society notice board. |
+| ![Specimen bill](docs/screenshots/specimen-bill.jpg) **Specimen bill** (fictional, watermarked): a provisional month the Reader flags. | ![Specimen quotation](docs/screenshots/specimen-quote.jpg) **Specimen quotation** (fictional, watermarked). |
+
+<p align="center"><img src="docs/screenshots/23-mobile.jpg" width="260" alt="SolarSabha on a phone"></p>
+
+## How it works
+
+### Architecture
+
+```mermaid
+flowchart LR
+  subgraph Browser["Committee's browser"]
+    UI["React app<br/>pixel office + folders"]
+  end
+  subgraph AWS["AWS ap-south-1"]
+    APIGW["API Gateway<br/>HTTP API"]
+    API["API Lambda"]
+    WAKE["Wake-up Lambda"]
+    DDB[("DynamoDB<br/>projects")]
+    S3[("S3<br/>documents")]
+    SCHED["EventBridge Scheduler<br/>per-project alarms"]
+    BR["Amazon Bedrock<br/>India-only profile"]
+  end
+  UI --> APIGW --> API
+  API --> DDB & S3
+  API -- "live reader" --> BR
+  API -- "set alarm" --> SCHED
+  SCHED -- "due date" --> WAKE --> DDB
+```
+
+### The agent team
+
+```mermaid
+flowchart TB
+  C(["Committee"]) <--> SEC["Sabha Secretary<br/>coordinator"]
+  SEC -- "agent as tool" --> RDR["Reader"]
+  SEC -- "agent as tool" --> AUD["Auditor"]
+  SEC -- "agent as tool" --> CHS["Chaser"]
+  SEC --> T1["sizing, money, fairness"]
+  AUD --> T2["audit_quote, check_vendor"]
+  CHS --> T3["timeline, classify_reply, replan, drafts"]
+  T1 & T2 & T3 --> RB[("Rulebook<br/>dated, cited, per state")]
+```
+
+Agents (Strands Agents SDK on Amazon Bedrock) read, explain and draft. **Ordinary, tested code does every calculation and
+every rule check.** The Planner is deliberately not an agent. The same tools are also exposed through our own
+**SolarRules MCP server**.
+
+### How an agent waits three weeks
+
+```mermaid
+sequenceDiagram
+  participant P as Committee
+  participant API as API Lambda
+  participant S as EventBridge Scheduler
+  participant W as Wake-up Lambda
+  P->>API: records progress (portal application done)
+  API->>S: alarm for the day feasibility is due
+  Note over S: weeks pass, nothing runs, nothing is billed
+  S->>W: wake {project_id}
+  W->>W: recompute against today: 16 days late
+  W->>S: next alarm in 7 days
+  P->>API: opens the app: escalation letter waiting
+```
+
+### From a bill PDF to a plan
+
+```mermaid
+sequenceDiagram
+  participant UI
+  participant API
+  participant RD as Reader
+  participant PL as Pipeline (plain code)
+  UI->>API: upload bill (key + role checked, type sniffed, 6 MB cap)
+  API->>RD: offline rules, or Bedrock when live
+  RD-->>API: month, units, amount, unclear?
+  API->>PL: merge, recompute
+  PL-->>UI: plan, audit, drafts, trace (the office replays it)
+```
+
+More diagrams (project stages, data model): [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Trust by design
+
+| Rule | How it is enforced |
+|---|---|
+| AI reads and writes; code calculates | sizing, money, CO2, audit flags and timeline are plain functions with tests |
+| Documents are data, never instructions | hidden text is extracted and scanned; an instruction-like phrase turns the quote red |
+| Draft only | there is no send, sign, pay or file function in the codebase |
+| Named approvals | approvals record who and when, and are withdrawn if the letter changes |
+| Cite the rulebook | every rule shows its value, source, status (official, verify, our assumption) and date |
+| Label simulations | the vendor negotiation, the clock and the sample vendor list say so on screen |
+
+The rulebook was checked against the MNRE PM Surya Ghar guidelines (June 2024): for example, subsidy only through vendors
+**registered on the National Portal**, a **5-year free maintenance contract**, and subsidy **processed within 15 days**
+of DISCOM approval. See [docs/RULEBOOK_VERIFICATION.md](docs/RULEBOOK_VERIFICATION.md).
+
+## Privacy
+
+Per-project access keys (only a hash is stored), roles (secretary, member, viewer), recorded consent, a full activity log,
+export and delete, automatic deletion after a year, encryption at rest, and no tracking. Written for India's DPDP Act,
+2023. Details: [docs/PRIVACY.md](docs/PRIVACY.md).
+
+## Run it
+
+**Static demo (no server, 1 minute)**: the sample society, read-only.
+```bash
+cd frontend && npm install && npm run dev        # http://localhost:5173
+```
+
+**The full app locally (no AWS needed)**: create societies, upload PDFs, edit, approve, download letters.
+```bash
+python -m venv .venv && .venv/Scripts/activate   # macOS/Linux: source .venv/bin/activate
+make setup                                       # Python and npm dependencies
+make dev-api                                     # API on http://localhost:8787
+VITE_API_URL=http://localhost:8787 make dev-ui   # app on http://localhost:5173
+```
+Try it with the specimen documents in `backend/samples/pdfs/` (12 bills, 3 quotations).
+
+**With the AI Reader**: set `BEDROCK_MODEL_ID` and `READER_MODE=live` in `.env` (see `.env.example`), then
+`python scripts/smoke_live.py`.
+
+**Deploy to AWS**: `make deploy` (SAM), then host `frontend/dist` on Amplify. Step by step: [docs/SETUP_AWS.md](docs/SETUP_AWS.md).
+
+## Tests and quality
+
+| Check | Command | Result |
+|---|---|---|
+| Backend unit + API tests (reader, pipeline, roles, privacy, alarms, wake-up) | `make test` | 56 passing |
+| Frontend tests (Vitest) | `make test-ui` | 31 passing |
+| Accuracy scoreboard: tools + offline reader on all 15 specimen PDFs | `make evals` | 24/24 |
+| AWS template lint | `make lint-infra` | clean |
+| Everything CI runs | `make check` | GitHub Actions on every push |
+
+## API
+
+Every `/projects/{id}` route needs `x-project-key`; routes that change data also need `x-actor` (a committee member allowed to).
+
+| Method and path | Purpose |
+|---|---|
+| `POST /projects` | `{"sample": true}` or `{"society", "you", "consent": true}`; returns the access key once |
+| `GET /projects/{id}` · `GET /projects/{id}/export` · `DELETE /projects/{id}` | read, export all data, delete (secretary) |
+| `PUT /projects/{id}/society \| bills \| quotes \| flats \| assumptions \| events \| members` | edit inputs |
+| `POST /projects/{id}/documents` · `GET`/`DELETE /projects/{id}/documents/{did}` | upload and read, original, delete |
+| `PUT /projects/{id}/drafts/{did}` · `POST .../approve` · `GET .../docx` | edit, approve, Word download |
+| `POST /projects/{id}/discom-reply` · `POST .../advance` · `POST .../clock/reset` | DISCOM reply; simulated clock |
+| `GET /rules` · `GET /health` | rulebook and states; liveness |
+
+## Repository
+
+```
+backend/solarsabha/
+  pipeline.py        the whole loop as a pure function (no AWS, no AI)
+  project.py         access keys, roles, consent, documents, drafts, clock, audit log
+  reading.py         offline reader for digital PDFs
+  alarm.py           EventBridge alarms for the Chaser
+  export.py          Word letters with a society letterhead
+  schemas.py         request validation
+  tools/             sizing, quotes, fairness, negotiation, timeline, drafts (plain code)
+  agents/            Strands agents: Secretary, Reader, Auditor, Chaser; MCP link
+  handlers/          API and wake-up Lambdas
+  data/rulebook.json dated, cited rules with state overrides
+backend/mcp_server/  SolarRules MCP server
+backend/samples/     sample society and specimen PDFs (fictional, watermarked)
+frontend/src/        React app: office/ (scene), pixel/ (sprites), components/ (folders)
+infra/template.yaml  AWS SAM
+scripts/             dev server, evals, sample generator, live smoke test
+docs/                architecture, privacy, rulebook verification, AWS setup, demo script, judge Q&A
+```
 
 ## Honest status
 
 | Part | Status |
 |---|---|
-| Rulebook, sizing, money, CO2, fairness, quote audit, timeline, chasing, negotiation logic, drafts | Written and unit-tested (19 tests pass, no AWS needed) |
-| Offline pipeline, local API, React UI (mock mode), MCP server | Written; pipeline, API handler and MCP server are tested. UI builds; **not yet checked visually in a browser by the author** |
-| Strands agents (Reader, Auditor, Chaser, Secretary), multimodal reading | Written against `strands-agents==1.58.0`; agents construct and tools register (tested). **Never run against a live Bedrock model.** Run `scripts/smoke_live.py` first and fix what it reports |
-| SAM template | Passes `cfn-lint`. **Never deployed** |
-| Vendors, DISCOM replies, clock, approved-vendor list | **Simulated and labelled as such** |
-| Rulebook values marked `vendor-guide-verify` | **Must be verified** against official guidelines (`docs/RULEBOOK_VERIFICATION.md`) |
+| Projects, uploads, offline reading, plan, audit, letters, approvals, timeline, roles, privacy controls | Working and tested locally |
+| AWS template (DynamoDB, S3, Lambdas, Scheduler alarms) | Lint-clean; deploy with `make deploy` |
+| Live Bedrock Reader and Strands agents | In the code; our new AWS account is still restricted from Bedrock, so recordings use the offline reader and say so |
+| Vendor replies, the sample DISCOM reply, the time machine, the vendor list | Simulated or sample data, labelled on screen |
+| State-specific rules | Special-category subsidy loaded; other state rules are added only when verified |
+| Identity | Per-project keys and roles; add Cognito for verified sign-in |
 
-## Quick start (no AWS, no LLM, 2 minutes)
+## Licence
 
-```bash
-make setup              # python deps + npm install
-make test               # 19 tests
-make demo               # whole product loop in the terminal
-make dev-ui             # http://localhost:5173 (bundled demo data)
-```
-
-Local API + UI together: `make dev-api` in one terminal, then `VITE_API_URL=http://localhost:8787 make dev-ui`.
-
-Live agents (needs AWS credentials and Bedrock model access, see `docs/SETUP_AWS.md`):
-```bash
-cp .env.example .env    # set BEDROCK_MODEL_ID
-make samples            # sample PDFs
-BEDROCK_MODEL_ID=... python scripts/smoke_live.py
-BEDROCK_MODEL_ID=... python scripts/run_evals.py --mode live
-```
-
-## Repository map
-
-```
-solarsabha/
-  README.md  Makefile  .env.example  .gitignore
-  docs/
-    SolarSabha_Research_and_Learning_Guide.pdf   the guide (read first)
-    ARCHITECTURE.md   how the pieces fit, how an agent "waits" weeks
-    AGENTS.md         how agents work in this repo, how to add a tool or agent
-    TWO_PERSON_SPLIT.md  who owns which folders, handoffs, git rules
-    TEAM_PLAN.md      4-day plan, owners, definition of done, cut list
-    DEMO_SCRIPT.md    3-minute video script and what is simulated
-    JUDGE_QA.md       hard questions and honest answers
-    RULEBOOK_VERIFICATION.md   checklist to verify every rule against official sources
-    SETUP_AWS.md      account, Bedrock access, deploy, hosting
-  backend/
-    solarsabha/
-      rules.py  data/rulebook.json  data/approved_vendors_sample.json   the dated, cited rulebook
-      tools/        PLAIN CODE (no AI): sizing.py quotes.py fairness.py timeline.py negotiation.py drafts.py
-      replan.py     classify a DISCOM reply and re-plan (Plan v1 vs v2)
-      pipeline.py   the whole loop, offline. Same tools the agents call
-      trace.py      records tool calls for the UI's live trace panel
-      state.py      local JSON or DynamoDB
-      agents/       prompts.py models.py factory.py reader.py mcp_tools.py   (Strands agents)
-      handlers/     api.py (API Gateway Lambda)  wake.py (scheduled wake-up)
-    mcp_server/solar_rules_server.py   SolarRules MCP server (rules + calculators as MCP tools)
-    samples/society.json  samples/pdfs/   sample society, bills, quotes (incl. prompt-injection trap)
-    tests/        19 tests
-  frontend/       React + Vite: pixel-art office driven by the agent trace, plus plan, quote audit, who pays, negotiation room, timeline, drafts, logbook
-  infra/template.yaml   AWS SAM: DynamoDB, S3, HTTP API, Lambdas, scheduler role
-  scripts/        demo_offline, run_evals, generate_samples, export_demo_json, dev_server, smoke_live
-```
-
-## Design rules (do not break these)
-
-1. **AI reads and writes. Code calculates.** Numbers come from `tools/`, never from the model.
-2. **Documents are data, never instructions.** Rules live in prompts and the rulebook only.
-3. **Draft-only.** There is no send, pay, sign or file function anywhere. Keep it that way.
-4. **Cite the rulebook.** Every rule has a source, a status and a date. "Not verified" is a valid answer.
-5. **Label simulations.** Anything simulated says so in the UI and in the video.
-6. One feature that runs beats five that almost do. See `docs/TEAM_PLAN.md` for the cut list.
-
-Add a license file if the hackathon rules require one.
+MIT. Sample society, vendors, DISCOM and documents are fictional.

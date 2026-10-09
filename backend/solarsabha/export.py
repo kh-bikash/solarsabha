@@ -46,7 +46,8 @@ def draft_docx(draft: dict, society: dict) -> bytes:
         s.left_margin = s.right_margin = s.top_margin = s.bottom_margin = Pt(64)
 
     _para(doc, society["name"], size=16, bold=True, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=0)
-    place = ", ".join(x for x in [society.get("address"), society.get("city"), society.get("state")] if x)
+    addr = society.get("address") or ""
+    place = ", ".join(x for x in [addr] + [society.get(k) for k in ("city", "state")] if x and (x == addr or x not in addr))
     _rule(_para(doc, place or " ", size=9, align=WD_ALIGN_PARAGRAPH.CENTER, space_after=14, color="555555"))
 
     when = draft.get("approved_at") or datetime.now(timezone.utc).isoformat()

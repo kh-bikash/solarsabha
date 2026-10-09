@@ -29,6 +29,19 @@ def test_new_project_needs_consent_and_details(tmp_path, monkeypatch):
     assert call("POST", "/projects", {})[0] == 400
     assert call("POST", "/projects", {"sample": True, "surprise": 1})[0] == 400       # unknown fields rejected
 
+def test_special_category_state_gets_the_higher_subsidy(tmp_path, monkeypatch):
+    monkeypatch.setenv("LOCAL_STATE_DIR", str(tmp_path))
+    body = lambda state: {"society": {"name": "Hill View CHS", "flats": 40, "state": state}, "you": {"name": "Asha"}, "consent": True}
+    bills = {"bills": [{"month": f"2026-{m:02d}", "units_kwh": 4000} for m in range(1, 13)]}
+    subsidy = {}
+    for state in ("Assam", "Maharashtra"):
+        _, d = call("POST", "/projects", body(state))
+        _, d = call("PUT", f"/projects/{d['id']}/bills", bills, key=d["access_key"], actor="Asha")
+        rec = d["result"]["recommended"]
+        subsidy[state] = rec["subsidy"] / rec["kw"]
+        assert d["result"]["rule_coverage"]["overrides"] == (1 if state == "Assam" else 0)
+    assert subsidy == {"Assam": 19800, "Maharashtra": 18000}
+
 def test_empty_project_waits_for_inputs(real):
     pid, key = real
     code, d = call("GET", f"/projects/{pid}", key=key)
@@ -122,7 +135,7 @@ def test_export_and_delete(real):
     assert call("DELETE", f"/projects/{pid}", {"confirm_name": "green park chs"}, key=key, actor="Asha")[0] == 200
     assert call("GET", f"/projects/{pid}", key=key)[0] == 404
 
-def test_expired_projects_disappear(real, monkeypatch, tmp_path):
+def test_expired_projects_disappear(real, tmp_path):
     pid, key = real
     path = tmp_path / f"{pid}.json"
     doc = json.loads(path.read_text()); doc["expires_at"] = 1; path.write_text(json.dumps(doc))

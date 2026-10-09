@@ -6,6 +6,7 @@ In the demo the time machine moves a simulated clock through the same recompute.
 import json
 import logging
 
+from .. import alarm
 from .. import project as P
 from ..state import get_store
 
@@ -23,6 +24,7 @@ def handler(event, context=None):
     if after != before:
         P.log(doc, "Chaser (scheduled)", "woke up and re-checked the timeline",
               f"{after['label']}: {after['status'].lower()}" + (f", {after['overdue_by']} days late" if after.get("overdue_by") else ""))
+    doc["alarm_at"] = alarm.sync(doc)               # set the next alarm
     store.put(pid, doc)
     log.info(json.dumps({"event": "wake", "project": pid, "next_action": after}))
     return {"ok": True, "next_action": after}

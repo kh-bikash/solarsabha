@@ -105,6 +105,10 @@ Resources:
     Properties:
       CodeUri: ../backend/
       Handler: solarsabha.handlers.api.handler
+      Environment:
+        Variables:
+          SCHEDULER_ROLE_ARN: !GetAtt SchedulerInvokeRole.Arn
+          WAKE_FUNCTION_ARN: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-wake'
       Policies:
         - DynamoDBCrudPolicy: {TableName: !Ref StateTable}
         - S3CrudPolicy: {BucketName: !Ref UploadsBucket}
@@ -115,6 +119,15 @@ Resources:
               Resource:
                 - 'arn:aws:bedrock:*::foundation-model/*'
                 - !Sub 'arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/*'
+        - Statement:
+            - Sid: ManageChaserAlarms
+              Effect: Allow
+              Action: [scheduler:CreateSchedule, scheduler:UpdateSchedule, scheduler:DeleteSchedule]
+              Resource: !Sub 'arn:aws:scheduler:${AWS::Region}:${AWS::AccountId}:schedule/default/solarsabha-*'
+            - Sid: PassRoleToScheduler
+              Effect: Allow
+              Action: iam:PassRole
+              Resource: !GetAtt SchedulerInvokeRole.Arn
       Events:
         Any:
           Type: HttpApi
@@ -129,10 +142,24 @@ Resources:
   WakeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub '${AWS::StackName}-wake'
       CodeUri: ../backend/
       Handler: solarsabha.handlers.wake.handler
+      Environment:
+        Variables:
+          SCHEDULER_ROLE_ARN: !GetAtt SchedulerInvokeRole.Arn
+          WAKE_FUNCTION_ARN: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-wake'
       Policies:
         - DynamoDBCrudPolicy: {TableName: !Ref StateTable}
+        - Statement:
+            - Sid: ManageChaserAlarms
+              Effect: Allow
+              Action: [scheduler:CreateSchedule, scheduler:UpdateSchedule, scheduler:DeleteSchedule]
+              Resource: !Sub 'arn:aws:scheduler:${AWS::Region}:${AWS::AccountId}:schedule/default/solarsabha-*'
+            - Sid: PassRoleToScheduler
+              Effect: Allow
+              Action: iam:PassRole
+              Resource: !GetAtt SchedulerInvokeRole.Arn
 
   WakeLogs:
     Type: AWS::Logs::LogGroup
@@ -140,8 +167,8 @@ Resources:
       LogGroupName: !Sub '/aws/lambda/${WakeFunction}'
       RetentionInDays: 30
 
-  # EventBridge Scheduler assumes this role to invoke WakeFunction. Per-project one-time schedules are created
-  # at run time with input {"project_id": "<id>"} (see docs/ARCHITECTURE.md, "How the agent waits").
+  # EventBridge Scheduler assumes this role to invoke WakeFunction. Per-project one-time schedules
+  # (solarsabha-<id>) are created and moved at run time by solarsabha/alarm.py.
   SchedulerInvokeRole:
     Type: AWS::IAM::Role
     Properties:
@@ -159,7 +186,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action: lambda:InvokeFunction
-                Resource: !GetAtt WakeFunction.Arn
+                Resource: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-wake'
 
 Outputs:
   ApiUrl:

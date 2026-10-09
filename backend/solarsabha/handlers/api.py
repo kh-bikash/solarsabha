@@ -33,6 +33,7 @@ from urllib.parse import unquote
 
 from pydantic import ValidationError
 
+from .. import alarm
 from .. import project as P
 from .. import rules, schemas as S
 from ..export import draft_docx, draft_filename
@@ -86,6 +87,7 @@ def _header(event: dict, name: str) -> str | None:
 # who: "read" = anyone with the key; "edit" = secretary or member; "secretary" = secretary only
 
 def _save(store, doc):
+    doc["alarm_at"] = alarm.sync(doc)               # the Chaser's next wake-up (AWS only)
     store.put(doc["id"], doc)
     return _resp(200, P.public(doc))
 
@@ -97,6 +99,7 @@ def r_delete(ev, store, doc, actor, m):
     if b.confirm_name.casefold() != doc["inputs"]["society"]["name"].casefold():
         raise P.ProjectError(400, "type the society name exactly to confirm deletion")
     get_files().delete_project(doc["id"])
+    alarm.remove(doc["id"])
     store.delete(doc["id"])
     log.info(json.dumps({"event": "project_deleted", "project": doc["id"]}))
     return _resp(200, {"deleted": True})
@@ -227,6 +230,7 @@ def _route(event: dict, method: str, path: str):
     if method == "POST" and path == "/projects":
         b = _parse(event, S.CreateProject)
         doc, key = P.create(new_id(), b)
+        doc["alarm_at"] = alarm.sync(doc)
         store.put(doc["id"], doc)
         return _resp(201, {**P.public(doc), "access_key": key}), doc["id"]
     pm = re.fullmatch(r"/projects/([0-9a-f]{10})(/.*)?", path)

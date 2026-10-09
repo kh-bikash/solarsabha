@@ -1,82 +1,339 @@
 {
-  "_about": "The rulebook is the single source of truth for rules and constants. Agents and tools must read values from here and cite them. status: 'official' = taken from a government or regulator document. 'vendor-guide-verify' = from company guides, MUST be verified against the official scheme guidelines before the demo. 'team-assumption' = our own illustrative number.",
+  "_about": "The rulebook is the single source of truth for rules and constants. Agents and tools must read values from here and cite them. status: 'official' = taken from a government or regulator document. 'vendor-guide-verify' = from company guides, MUST be verified against the official scheme guidelines before the demo. 'team-assumption' = our own illustrative number. Verified against the MNRE operational guidelines (June 2024) on 2026-10-09; see docs/RULEBOOK_VERIFICATION.md.",
   "rules": {
     "subsidy_per_kw_ghs": {
-      "value": 18000, "unit": "INR per kW", "status": "official", "as_of": "2024-03",
-      "source": "MNRE / PM Surya Ghar subsidy structure sheet (CFA_structure20240307.pdf)",
-      "note": "For common facilities of Group Housing Societies / RWAs, including EV charging."
+      "value": 18000,
+      "unit": "INR per kW",
+      "status": "official",
+      "as_of": "2024-06",
+      "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table, S. No. 4; also the CFA structure sheet (March 2024)",
+      "note": "For common facilities of Group Housing Societies / RWAs, including EV charging, up to 500 kWp at 3 kWp per house. Special category States/UTs get Rs 19,800 (see state overrides)."
     },
     "cap_kw_per_flat": {
-      "value": 3, "unit": "kW per flat", "status": "official", "as_of": "2024-03",
-      "source": "MNRE / PM Surya Ghar subsidy structure sheet",
+      "value": 3,
+      "unit": "kW per flat",
+      "status": "official",
+      "as_of": "2024-06",
+      "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table, S. No. 4",
       "note": "A CEILING, not a target. Size to the common-meter load."
     },
     "cap_total_kw_ghs": {
-      "value": 500, "unit": "kW", "status": "official", "as_of": "2024-03",
-      "source": "MNRE / PM Surya Ghar subsidy structure sheet",
-      "note": "Also counts any solar already installed by individual flat owners."
+      "value": 500,
+      "unit": "kW",
+      "status": "official",
+      "as_of": "2024-06",
+      "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table, S. No. 4",
+      "note": "The limit is inclusive of rooftop plants already installed by individual residents of the society."
     },
     "grid_emission_factor": {
-      "value": 0.710, "unit": "tCO2 per MWh", "status": "official", "as_of": "FY2024-25",
+      "value": 0.71,
+      "unit": "tCO2 per MWh",
+      "status": "official",
+      "as_of": "FY2024-25",
       "source": "Central Electricity Authority, CO2 Baseline Database User Guide v21.0",
-      "note": "Check for a newer CEA version before the final submission."
+      "note": "Weighted average for FY 2024-25 (CEA v21.0, Nov 2025). CEA has since published v22.0 (Sep 2026); update this value once its figures are checked."
     },
     "yield_kwh_per_kw_year": {
-      "value": 1400, "unit": "kWh per kW per year", "status": "vendor-guide-verify", "as_of": "2026",
+      "value": 1400,
+      "unit": "kWh per kW per year",
+      "status": "vendor-guide-verify",
+      "as_of": "2026",
       "source": "Company guides quote 1,400 to 1,800. We use the low end to stay conservative.",
       "note": "Location dependent. Replace with a sourced city value if available."
     },
     "target_share_of_load": {
-      "value": 0.85, "unit": "fraction", "status": "team-assumption", "as_of": "2026-10",
-      "source": "Our design choice, to avoid oversizing.", "note": "Changeable by the committee."
+      "value": 0.85,
+      "unit": "fraction",
+      "status": "team-assumption",
+      "as_of": "2026-10",
+      "source": "Our design choice, to avoid oversizing.",
+      "note": "Changeable by the committee."
     },
     "cost_per_kw": {
-      "value": 50000, "unit": "INR per kW", "status": "vendor-guide-verify", "as_of": "2026",
-      "source": "Company guides quote roughly 45,000 to 60,000 INR per kW.", "note": "Used only for illustration."
+      "value": 50000,
+      "unit": "INR per kW",
+      "status": "team-assumption",
+      "as_of": "2026-10",
+      "source": "Our illustrative figure. MNRE's benchmark cost is Rs 50,000/kW for the first 2 kW and Rs 45,000/kW after that (Rs 55,000 / 49,500 in special category States); market prices for society systems vary.",
+      "note": "Benchmark: Guidelines (June 2024), section 5(g). Replace with your vendors' quotes."
     },
     "price_band_per_kw": {
-      "value": {"low": 42000, "high": 58000}, "unit": "INR per kW", "status": "team-assumption", "as_of": "2026-10",
-      "source": "Derived from the guide range, widened slightly.", "note": "Outside the band is a flag, not a verdict."
+      "value": {
+        "low": 42000,
+        "high": 58000
+      },
+      "unit": "INR per kW",
+      "status": "team-assumption",
+      "as_of": "2026-10",
+      "source": "Derived from the guide range, widened slightly.",
+      "note": "Outside the band is a flag, not a verdict."
     },
     "default_tariff_inr_per_kwh": {
-      "value": 7, "unit": "INR per kWh", "status": "team-assumption", "as_of": "2026-10",
-      "source": "Illustrative. Real value depends on state and tariff class; read it from the bill.", "note": ""
+      "value": 7,
+      "unit": "INR per kWh",
+      "status": "team-assumption",
+      "as_of": "2026-10",
+      "source": "Illustrative. Real value depends on state and tariff class; read it from the bill.",
+      "note": ""
     },
     "advance_flag_pct": {
-      "value": 20, "unit": "percent", "status": "team-assumption", "as_of": "2026-10",
-      "source": "Our policy threshold for flagging a large advance payment.", "note": "Not a legal limit."
+      "value": 20,
+      "unit": "percent",
+      "status": "team-assumption",
+      "as_of": "2026-10",
+      "source": "Our policy threshold for flagging a large advance payment.",
+      "note": "Not a legal limit."
     },
     "min_service_years": {
-      "value": 3, "unit": "years", "status": "team-assumption", "as_of": "2026-10",
-      "source": "Our threshold for flagging a short service/maintenance period.", "note": ""
+      "value": 5,
+      "unit": "years",
+      "status": "official",
+      "as_of": "2024-06",
+      "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), section 7(d): registered vendors provide repairs and maintenance free of cost for a 5-year Comprehensive Maintenance Contract from commissioning",
+      "note": "A quotation offering less than 5 years of free maintenance falls short of the scheme's requirement."
     },
     "sign_before_approval_warning": {
       "value": "Signing with an installer or paying a large advance before DISCOM approval may put the subsidy at risk.",
-      "unit": "text", "status": "vendor-guide-verify", "as_of": "2026",
-      "source": "Several company guides. Verify in the official guidelines.", "note": "Show as a warning, never as law."
+      "unit": "text",
+      "status": "team-assumption",
+      "as_of": "2026-10",
+      "source": "Our advice. The MNRE guidelines (June 2024) do not forbid it; it is risky because the DISCOM can refuse feasibility or limit the capacity.",
+      "note": "Show as a caution, never as law."
     },
-    "empanelled_vendor_requirement": {
-      "value": "Use an installer from the official empanelled/registered vendor list; a non-listed installer may void the subsidy.",
-      "unit": "text", "status": "vendor-guide-verify", "as_of": "2026",
-      "source": "Company guides. Verify on the national portal.", "note": ""
+    "registered_vendor_requirement": {
+      "value": "The subsidy (CFA) is available only if the system is installed by a vendor registered on the PM Surya Ghar National Portal.",
+      "unit": "text",
+      "status": "official",
+      "as_of": "2024-06",
+      "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), section 7(a) Registration of Vendors",
+      "note": "The scheme uses registration on the portal, not tender empanelment. Check the vendor's registration on pmsuryaghar.gov.in."
     },
     "missed_inspection_rule": {
       "value": "Guides say repeated missed DISCOM inspection appointments can lead to cancellation.",
-      "unit": "text", "status": "vendor-guide-verify", "as_of": "2026",
-      "source": "One company guide. Verify.", "note": ""
+      "unit": "text",
+      "status": "vendor-guide-verify",
+      "as_of": "2026",
+      "source": "One company guide. Not found in the MNRE guidelines (June 2024); verify with your DISCOM.",
+      "note": "Do not present as a rule."
     },
     "stages": {
       "value": [
-        {"key": "AGM", "label": "Society decision (AGM)", "min_days": 5, "max_days": 7},
-        {"key": "PORTAL", "label": "Apply on portal", "min_days": 1, "max_days": 2},
-        {"key": "FEASIBILITY", "label": "DISCOM feasibility", "min_days": 14, "max_days": 25},
-        {"key": "INSTALL", "label": "Installation", "min_days": 15, "max_days": 25},
-        {"key": "METER", "label": "Net meter + inspection", "min_days": 10, "max_days": 14},
-        {"key": "SUBSIDY", "label": "Subsidy paid", "min_days": 25, "max_days": 30}
+        {
+          "key": "AGM",
+          "label": "Society decision (AGM)",
+          "min_days": 5,
+          "max_days": 7
+        },
+        {
+          "key": "PORTAL",
+          "label": "Apply on portal",
+          "min_days": 1,
+          "max_days": 2
+        },
+        {
+          "key": "FEASIBILITY",
+          "label": "DISCOM feasibility",
+          "min_days": 14,
+          "max_days": 25
+        },
+        {
+          "key": "INSTALL",
+          "label": "Installation",
+          "min_days": 15,
+          "max_days": 25
+        },
+        {
+          "key": "METER",
+          "label": "Net meter + inspection",
+          "min_days": 10,
+          "max_days": 14
+        },
+        {
+          "key": "SUBSIDY",
+          "label": "Subsidy paid",
+          "min_days": 7,
+          "max_days": 15
+        }
       ],
-      "unit": "days per stage", "status": "vendor-guide-verify", "as_of": "2026",
-      "source": "Vendor guides. Real timelines often run longer (IEEFA reported 45 to 120 days overall).", "note": "Used for chasing logic; not an official SLA."
+      "unit": "days per stage",
+      "status": "vendor-guide-verify",
+      "as_of": "2026",
+      "source": "Vendor guides for stages 1 to 5. The subsidy stage uses the official 15 days after DISCOM approval (Guidelines section 6(t)). Real timelines often run longer (IEEFA reported 45 to 120 days overall).",
+      "note": "Used for chasing logic; not an official SLA."
+    },
+    "ghs_common_facilities_only": {
+      "value": "The society's connection used under the scheme must serve only common facilities, not supply individual flats.",
+      "unit": "text",
+      "status": "official",
+      "as_of": "2024-06",
+      "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), section 5(f)",
+      "note": ""
+    },
+    "cfa_processing_days": {
+      "value": 15,
+      "unit": "days after DISCOM approval",
+      "status": "official",
+      "as_of": "2024-06",
+      "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), section 6(t): the CFA will be processed within 15 days of approval by the DISCOM",
+      "note": "Approval comes after the DISCOM's physical inspection and portal checklist (section 6(k))."
+    },
+    "grievance_resolution_days": {
+      "value": 30,
+      "unit": "days",
+      "status": "official",
+      "as_of": "2024-06",
+      "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), section 11(a): grievances raised on the National Portal are resolved within 30 days",
+      "note": ""
+    },
+    "small_system_deemed_feasible_kw": {
+      "value": 10,
+      "unit": "kW",
+      "status": "official",
+      "as_of": "2024-06",
+      "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), section 6(h), under the Electricity (Rights of Consumers) Rules, 2020",
+      "note": "Systems up to 10 kW are deemed technically feasible once the state provision is operational. Most society systems are larger and need DISCOM feasibility."
     }
   },
-  "state_overrides": {}
+  "state_overrides": {
+    "Uttarakhand": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Himachal Pradesh": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Jammu and Kashmir": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Ladakh": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Arunachal Pradesh": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Assam": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Manipur": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Meghalaya": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Mizoram": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Nagaland": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Tripura": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Sikkim": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Andaman and Nicobar Islands": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    },
+    "Lakshadweep": {
+      "subsidy_per_kw_ghs": {
+        "value": 19800,
+        "unit": "INR per kW",
+        "status": "official",
+        "as_of": "2024-06",
+        "source": "MNRE, Guidelines for PM-Surya Ghar: Muft Bijli Yojana, CFA to Residential Consumers (June 2024), CFA table for special category States/UTs, S. No. 4",
+        "note": "Special category States/UTs: Uttarakhand, Himachal Pradesh, J&K, Ladakh, the North East including Sikkim, A&N and Lakshadweep."
+      }
+    }
+  }
 }

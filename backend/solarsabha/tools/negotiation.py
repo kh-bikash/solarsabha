@@ -23,7 +23,7 @@ def run_simulated_negotiation(quote, audit, max_rounds=3) -> dict:
     if audit["verdict"] == "RED":
         return {"vendor": vendor, "simulated": True, "skipped": True, "rounds": [
             {"round": 1, "from": "committee", "kind": "request_proof", "price": None,
-             "message": "Before we discuss price, please share proof of empanelment. We will not negotiate until it is verified."}]}
+             "message": "Before we discuss price, please share proof of your registration on the PM Surya Ghar National Portal. We will not negotiate until it is verified."}]}
     if not quote.get("total_price_inr") or not quote.get("capacity_kw"):
         return {"vendor": vendor, "simulated": True, "skipped": True, "rounds": [
             {"round": 1, "from": "committee", "kind": "request_details", "price": None,

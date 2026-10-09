@@ -40,7 +40,7 @@ def audit_quote(q) -> dict:
 
     v = check_vendor(q["vendor"])
     if not v["found_in_list"]:
-        add("red", "VENDOR_NOT_VERIFIED", "Vendor not found in the approved list we loaded. A non-listed installer may void the subsidy. Ask for proof.", "empanelled_vendor_requirement")
+        add("red", "VENDOR_NOT_VERIFIED", "Vendor not found in the registered-vendor list we loaded. The subsidy is paid only for vendors registered on the PM Surya Ghar National Portal. Ask for proof.", "registered_vendor_requirement")
 
     adv = q.get("advance_pct")
     if adv is None:
@@ -60,7 +60,7 @@ def audit_quote(q) -> dict:
     if sy is None:
         add("amber", "SERVICE_MISSING", "Service/maintenance period not stated.")
     elif sy < rules.value("min_service_years"):
-        add("amber", "SERVICE_SHORT", f"Only {sy} year(s) of service; our flag level is {rules.value('min_service_years')}.", "min_service_years")
+        add("amber", "SERVICE_SHORT", f"Only {sy:g} year(s) of free maintenance; the scheme requires a {rules.value('min_service_years')}-year maintenance contract from registered vendors.", "min_service_years")
 
     inj = scan_for_injection(q.get("raw_text", ""))
     if inj:

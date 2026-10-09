@@ -25,7 +25,7 @@ export default function QuoteTable({ audits, band, rulebook, goTo }) {
     return (
       <div className="folder-body">
         <Empty title="No quotations to check yet" action={<button className="btn primary" onClick={() => goTo('docs')}>Add quotations in Documents</button>}>
-          Ask three or four empanelled vendors for quotations, then upload them. The Auditor checks price per kW, the vendor list,
+          Ask three or four vendors registered on the PM Surya Ghar National Portal for quotations, then upload them. The Auditor checks price per kW, the vendor list,
           payment terms, warranty and service, and scans for hidden instructions.
         </Empty>
       </div>

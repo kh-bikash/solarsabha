@@ -21,7 +21,7 @@
 - The model id is never hard-coded: `BEDROCK_MODEL_ID`.
 
 ## Debugging an agent
-Open the trace panel (UI) or read `Trace.events`. Wrong answer? Check in order: wrong tool chosen (docstring unclear), tool returned something odd (unit test it), prompt missing a rule, document contained something surprising.
+Open the Logbook folder (UI) or read `Trace.events`. Wrong answer? Check in order: wrong tool chosen (docstring unclear), tool returned something odd (unit test it), prompt missing a rule, document contained something surprising.
 
 ## Check these against current docs before relying on them
 Strands API (1.58 here): `Agent.as_tool`, `structured_output_model`, `callback_handler`, `MCPClient`. Bedrock content-block shapes for `document` and `image`. Run `scripts/smoke_live.py`.
