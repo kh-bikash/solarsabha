@@ -1,19 +1,24 @@
-import json, os
+import json
 from solarsabha.handlers.api import handler
 
-def _ev(method, path, body=None):
-    return {"requestContext": {"http": {"method": method}}, "rawPath": path, "body": json.dumps(body) if body else None}
+def _ev(method, path, body=None, key=None, actor=None):
+    headers = {k: v for k, v in {"x-project-key": key, "x-actor": actor}.items() if v}
+    return {"requestContext": {"http": {"method": method}}, "rawPath": path, "headers": headers,
+            "body": json.dumps(body) if body is not None else None}
 
 def test_api_flow(tmp_path, monkeypatch):
     monkeypatch.setenv("LOCAL_STATE_DIR", str(tmp_path))
-    r = handler(_ev("POST", "/projects")); assert r["statusCode"] == 201
-    doc = json.loads(r["body"]); pid = doc["id"]
-    r = handler(_ev("POST", f"/projects/{pid}/advance", {"days": 45})); d = json.loads(r["body"])
+    r = handler(_ev("POST", "/projects", {"sample": True})); assert r["statusCode"] == 201
+    doc = json.loads(r["body"]); pid, key = doc["id"], doc["access_key"]
+    who = dict(key=key, actor="Meera (sample)")
+    r = handler(_ev("POST", f"/projects/{pid}/advance", {"days": 45}, **who)); d = json.loads(r["body"])
     assert d["result"]["next_action"]["status"] == "OVERDUE"
-    r = handler(_ev("POST", f"/projects/{pid}/discom-reply", {"text": "Sanctioned load is insufficient. Maximum permissible solar is 25 kW."}))
+    r = handler(_ev("POST", f"/projects/{pid}/discom-reply", {"text": "Sanctioned load is insufficient. Maximum permissible solar is 25 kW."}, **who))
     assert json.loads(r["body"])["result"]["plan_v2"]["plan"]["recommended_kw"] == 25
     did = json.loads(r["body"])["drafts"][0]["id"]
-    r = handler(_ev("POST", f"/projects/{pid}/drafts/{did}/approve")); assert json.loads(r["body"])["drafts"][0]["status"] == "APPROVED"
+    r = handler(_ev("POST", f"/projects/{pid}/drafts/{did}/approve", {"name": "Arjun (sample)"}, **who))
+    d = json.loads(r["body"])["drafts"][0]
+    assert d["status"] == "APPROVED" and d["approved_by"] == "Arjun (sample)"
 
 def test_agents_construct_without_calling_a_model(monkeypatch):
     monkeypatch.setenv("BEDROCK_MODEL_ID", "test-model-id"); monkeypatch.setenv("AWS_REGION", "ap-south-1")

@@ -7,8 +7,8 @@ it only uses quotes the committee actually uploaded.
 from .. import rules
 
 PERSONAS = {
-    "Vendor A Solar Pvt Ltd": {"floor": 0.92, "concession": 0.5, "advance_floor": 5},
-    "Vendor C Energy LLP": {"floor": 0.88, "concession": 0.4, "advance_floor": 10},
+    "Suryakiran Rooftop Solar Pvt Ltd": {"floor": 0.92, "concession": 0.5, "advance_floor": 5},
+    "Urja Prime Energy LLP": {"floor": 0.88, "concession": 0.4, "advance_floor": 10},
 }
 
 def target_terms(quote) -> dict:
@@ -24,6 +24,10 @@ def run_simulated_negotiation(quote, audit, max_rounds=3) -> dict:
         return {"vendor": vendor, "simulated": True, "skipped": True, "rounds": [
             {"round": 1, "from": "committee", "kind": "request_proof", "price": None,
              "message": "Before we discuss price, please share proof of empanelment. We will not negotiate until it is verified."}]}
+    if not quote.get("total_price_inr") or not quote.get("capacity_kw"):
+        return {"vendor": vendor, "simulated": True, "skipped": True, "rounds": [
+            {"round": 1, "from": "committee", "kind": "request_details", "price": None,
+             "message": "Please send a complete quotation with the total price and system size before we discuss terms."}]}
     persona = PERSONAS.get(vendor, {"floor": 0.95, "concession": 0.3, "advance_floor": 10})
     tgt = target_terms(quote)
     price, adv = quote["total_price_inr"], quote.get("advance_pct") or 10

@@ -10,7 +10,7 @@ from solarsabha.trace import Trace
 t = Trace()
 print("1) model + plain agent")
 a = factory.build_auditor(t)
-print(str(a("Call audit_quote for vendor 'Vendor B Sun Traders', capacity_kw 36, total_price_inr 1400000, advance_pct 20. Summarise in two sentences."))[:400])
+print(str(a("Call audit_quote for vendor 'Sasta Sun Traders', capacity_kw 36, total_price_inr 1400000, advance_pct 20. Summarise in two sentences."))[:400])
 print("2) MCP tools")
 with solar_rules_mcp() as tools:
     print([x.tool_name for x in tools])

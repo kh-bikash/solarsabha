@@ -77,5 +77,6 @@
       "unit": "days per stage", "status": "vendor-guide-verify", "as_of": "2026",
       "source": "Vendor guides. Real timelines often run longer (IEEFA reported 45 to 120 days overall).", "note": "Used for chasing logic; not an official SLA."
     }
-  }
+  },
+  "state_overrides": {}
 }

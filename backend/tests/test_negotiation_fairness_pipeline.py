@@ -2,7 +2,7 @@ from solarsabha.pipeline import run_offline, load_sample_inputs
 from solarsabha.tools import negotiation, quotes, fairness
 
 def test_red_vendor_is_not_negotiated_with():
-    q = [x for x in load_sample_inputs()["quotes"] if "Vendor B" in x["vendor"]][0]
+    q = [x for x in load_sample_inputs()["quotes"] if "Sasta" in x["vendor"]][0]
     n = negotiation.run_simulated_negotiation(q, quotes.audit_quote(q))
     assert n["skipped"] and n["rounds"][0]["kind"] == "request_proof" and n["simulated"] is True
 
