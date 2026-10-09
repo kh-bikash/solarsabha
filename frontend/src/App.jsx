@@ -136,6 +136,7 @@ export default function App() {
           <span className="meta">{r.society.name} · {r.society.flats} flats · {r.society.discom}</span>
         </div>
         <div className="badges">
+          <span className="chip trackchip"><i />Track 03 · Waste and Energy</span>
           <span className="chip">{modeLabel}</span>
           {r.mode === 'offline' && <span className="chip">No AI model in this run</span>}
           <span className="tape">Simulated: {r.simulated_parts.join(', ')}</span>

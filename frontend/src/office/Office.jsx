@@ -100,8 +100,18 @@ function Room({ night, dayShown, board, hotObj, phase }) {
 
       {/* window with the society building and its solar roof */}
       <rect x="4" y="5" width="62" height="45" fill="#8d969b" />
-      <rect x="6" y="7" width="58" height="41" fill={night ? '#1a2346' : '#a9d9f0'} />
-      {!night && <rect x="6" y="30" width="58" height="18" fill="#c6e7f5" />}
+      <rect x="6" y="7" width="58" height="41" fill={night ? '#1a2346' : '#3f9fe3'} />
+      {!night && <>
+        <rect x="6" y="20" width="58" height="10" fill="#6db7ea" />
+        <rect x="6" y="30" width="58" height="18" fill="#a9d6f3" />
+        {[[9, 11, 9], [24, 15, 12], [40, 22, 8]].map(([x, y, w]) => (
+          <g key={x} className="cloud">
+            <rect x={x + 2} y={y - 2} width={w - 4} height="2" fill="#ffffff" />
+            <rect x={x} y={y} width={w} height="2" fill="#ffffff" />
+            <rect x={x + 1} y={y + 2} width={w - 2} height="1" fill="#d9ecf8" />
+          </g>
+        ))}
+      </>}
       {night ? <>
         <Sprite grid={P.MOON} pal={{ Y: '#f3e9b5' }} x={50} y={10} />
         {[[12, 11], [24, 16], [40, 9], [30, 24], [58, 22]].map(([x, y]) => <rect key={x} x={x} y={y} width="1" height="1" fill="#f3e9b5" />)}
