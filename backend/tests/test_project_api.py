@@ -158,3 +158,31 @@ def test_unknown_routes_and_bad_json(real):
     r = handler({"requestContext": {"http": {"method": "PUT"}}, "rawPath": f"/projects/{pid}/bills",
                  "headers": {"x-project-key": key, "x-actor": "Asha"}, "body": "{not json"})
     assert r["statusCode"] == 400
+
+def test_stale_saves_are_refused_not_silently_overwritten(real, tmp_path):
+    from solarsabha.state import ConflictError, LocalStore
+    pid, key = real
+    store = LocalStore(str(tmp_path))
+    a, b = store.get(pid), store.get(pid)            # two requests read the same version
+    store.put(pid, a)                                 # the first saves
+    with pytest.raises(ConflictError):
+        store.put(pid, b)                             # the second would overwrite it
+    assert store.get(pid)["version"] == a["version"]
+
+def test_api_turns_a_conflict_into_a_clear_409(real, monkeypatch):
+    from solarsabha.state import ConflictError, LocalStore
+    pid, key = real
+    def conflict(self, pid, doc):
+        raise ConflictError(pid)
+    monkeypatch.setattr(LocalStore, "put", conflict)
+    code, d = call("PUT", f"/projects/{pid}/assumptions", {"tariff": 8}, key=key, actor="Asha")
+    assert code == 409 and d["conflict"] is True and "reloaded" in d["error"]
+
+
+def test_a_review_job_that_died_with_its_lambda_does_not_block_a_new_one():
+    from datetime import datetime, timedelta, timezone
+    from solarsabha.handlers import api
+    old = (datetime.now(timezone.utc) - timedelta(seconds=api.REVIEW_JOB_STALE + 5)).isoformat(timespec="seconds")
+    assert api._job_stale({"status": "running", "started_at": old})
+    assert not api._job_stale({"status": "running", "started_at": datetime.now(timezone.utc).isoformat(timespec="seconds")})
+    assert api._job_stale({"status": "running"})

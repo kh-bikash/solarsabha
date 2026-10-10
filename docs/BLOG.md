@@ -50,14 +50,14 @@ is off, the app says "Offline reader, no AI model".
 ## How it runs on AWS
 
 React on Amplify Hosting; API Gateway and two Lambdas (Python 3.12, SAM); DynamoDB with TTL and point-in-time recovery;
-an encrypted private S3 bucket; EventBridge Scheduler for the Chaser's alarms; Amazon Bedrock (India-only inference
-profile) through the Strands Agents SDK; our own SolarRules MCP server for the rules and calculators.
+an encrypted private S3 bucket; EventBridge Scheduler for the Chaser's alarms; Gemini through the Strands Agents SDK
+(Amazon Bedrock is one parameter away), with keys in SSM Parameter Store; our own SolarRules MCP server for the rules and calculators.
 
 ## What we measured
 
 - 30/30 on our accuracy scoreboard: the plain-code tools plus the offline reader on 18 specimen documents (12 bills,
   6 quotations with known answers: two green, two amber, two red).
-- 68 backend and 32 frontend tests in CI on every push.
+- 85 backend and 32 frontend tests in CI on every push.
 - For the sample society: 36 kW, Rs 11.52 lakh after a Rs 6.48 lakh subsidy, about 3.3 years simple payback,
   about 36 tonnes of CO2 avoided a year (CEA factor 0.710 t/MWh). These are computed, not measured outcomes.
 
@@ -65,4 +65,4 @@ profile) through the Strands Agents SDK; our own SolarRules MCP server for the r
 
 Verified sign-in, state-by-state DISCOM rules, Hindi and other languages, and a pilot with [a real society].
 
-Live app: https://main.d2vnrqt0vyz925.amplifyapp.com · Code: https://github.com/kh-bikash/solarsabha
+Live app: https://solarsabha.d2vnrqt0vyz925.amplifyapp.com · Code: https://github.com/kh-bikash/solarsabha

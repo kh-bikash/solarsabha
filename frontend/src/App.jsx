@@ -125,6 +125,13 @@ function Workspace({ session, initial, onLeave, onActor, notify }) {
   }
   const onSaved = (next) => continueWith(next)
 
+  // Another member (or a background job) saved this project first: load the latest version.
+  useEffect(() => {
+    const reload = () => api.getProject(session).then((next) => { projectRef.current = next; setProject(next) }).catch(() => {})
+    window.addEventListener('solarsabha:conflict', reload)
+    return () => window.removeEventListener('solarsabha:conflict', reload)
+  }, [session])
+
   // playback: one event at a time
   useEffect(() => {
     if (current || !queue.length || phase !== 'day') return
@@ -174,7 +181,14 @@ function Workspace({ session, initial, onLeave, onActor, notify }) {
   const clearReply = () => act(async () => continueWith(await api.clearReply(session)))
   const runReview = () => act(async () => {
     notify('ok', 'The Secretary is reviewing the project with the Auditor and the Chaser…')
-    const next = await api.review(session)
+    let next = await api.review(session)
+    // On AWS the review runs in the background (API Gateway answers within 30 s): check back until it is finished.
+    for (let i = 0; next.review_job?.status === 'running' && i < 200; i++) {     // up to 10 minutes
+      await sleep(3000)
+      next = await api.getProject(session)
+    }
+    if (next.review_job?.status === 'running') throw new Error('The agents are still working. Check back in a minute.')
+    if (next.review_job?.status === 'failed') { projectRef.current = next; setProject(next); throw new Error(next.review_job.error) }
     projectRef.current = next
     setProject(next)
     setQueue((q) => [...q, ...describeAgentRun(next.review.trace).map(withKey)])
@@ -207,7 +221,8 @@ function Workspace({ session, initial, onLeave, onActor, notify }) {
   const last = current || played[played.length - 1]
   const total = played.length + queue.length + (current ? 1 : 0)
   const live = r.reader_mode === 'live'
-  const modeLabel = MODE === 'MOCK' ? 'Static demo' : live ? 'Live agents on Bedrock' : 'Offline reader · no AI model'
+  const providerName = r.ai_provider === 'bedrock' ? 'Amazon Bedrock' : r.ai_fallback?.length ? `Gemini (+${r.ai_fallback.length} backup)` : 'Gemini'
+  const modeLabel = MODE === 'MOCK' ? 'Static demo' : live ? `Live agents on ${providerName}` : 'Offline reader · no AI model'
   const soc = project.inputs.society
 
   return (
@@ -276,8 +291,8 @@ function Workspace({ session, initial, onLeave, onActor, notify }) {
               : <button className="btn dark" disabled={busy || !editRole} onClick={() => { setReplyText(''); setReplyOpen(true) }}>
                   <PixelIcon grid={ICONS.mail} pal={iconPal('#fbf8f1')} size={14} />A DISCOM reply arrived</button>}
             <button className="btn dark" disabled={busy || !live || !canEdit} onClick={runReview}
-              title={live ? 'The Secretary calls the Auditor and the Chaser on Amazon Bedrock' : 'Live agents are off: this deployment runs the offline reader'}>
-              Ask the agents to review</button>
+              title={live ? `The Secretary calls the Auditor and the Chaser (${providerName})` : 'Live agents are off: this deployment runs the offline reader'}>
+              {busy && project.review_job?.status === 'running' ? 'The agents are reviewing…' : 'Ask the agents to review'}</button>
             {project.review && <p className={'fine review-state' + (r.review_stale ? ' stale' : '')}>
               {r.review_stale ? 'The agents’ review is out of date: inputs changed since.' : `Reviewed by the agents on ${new Date(project.review.at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}.`}</p>}
             {!live && MODE === 'LIVE' && <p className="fine">Live agents are off in this deployment (offline reader).</p>}

@@ -6,7 +6,8 @@ Built for WeMakeDevs × AWS *Environmental Hacks, Bharat Builds Tour 2026*, **Tr
 [![CI](https://github.com/kh-bikash/solarsabha/actions/workflows/ci.yml/badge.svg)](https://github.com/kh-bikash/solarsabha/actions/workflows/ci.yml)
 ![Python 3.12](https://img.shields.io/badge/python-3.12-blue) ![React 18](https://img.shields.io/badge/react-18-blue) ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-**Live app: https://main.d2vnrqt0vyz925.amplifyapp.com** (AWS Amplify, API Gateway, Lambda, DynamoDB, S3 and EventBridge Scheduler, Mumbai region).
+**Live app: https://solarsabha.d2vnrqt0vyz925.amplifyapp.com** (AWS Amplify, API Gateway, Lambda, DynamoDB, S3, EventBridge Scheduler
+and SSM Parameter Store, Mumbai region; the agents run on Gemini).
 Open the sample society, or start your own and upload the specimen bills from [`backend/samples/pdfs`](backend/samples/pdfs).
 
 ![The SolarSabha office: four agents at work, the committee's desk in front](docs/screenshots/03-office.jpg)
@@ -68,11 +69,20 @@ flowchart LR
     DDB[("DynamoDB<br/>projects")]
     S3[("S3<br/>documents")]
     SCHED["EventBridge Scheduler<br/>per-project alarms"]
-    BR["Amazon Bedrock<br/>India-only profile"]
+    SSM["SSM Parameter Store<br/>model keys, encrypted"]
+  end
+  subgraph Models["AI models (one at a time)"]
+    GEM["Gemini<br/>7-model chain"]
+    BAK["BazaarLink<br/>text-only backup"]
+    BR["Amazon Bedrock<br/>switchable"]
   end
   UI --> APIGW --> API
   API --> DDB & S3
-  API -- "live reader" --> BR
+  API -- "review runs in the background" --> API
+  API -. "key" .-> SSM
+  API -- "live agents" --> GEM
+  GEM -. "out of quota" .-> BAK
+  API -. "ModelProvider=bedrock" .-> BR
   API -- "set alarm" --> SCHED
   SCHED -- "due date" --> WAKE --> DDB
 ```
@@ -91,7 +101,7 @@ flowchart TB
   T1 & T2 & T3 --> RB[("Rulebook<br/>dated, cited, per state")]
 ```
 
-Agents (Strands Agents SDK on Amazon Bedrock) read, explain and draft. **Ordinary, tested code does every calculation and
+Agents (Strands Agents SDK) read, explain and draft. **Ordinary, tested code does every calculation and
 every rule check.** The Planner is deliberately not an agent. The shared rules and calculators are served by our own
 **SolarRules MCP server**, which the agents use when it is available.
 
@@ -99,6 +109,21 @@ In live mode, **Ask the agents to review** runs the Secretary, which calls the A
 tool calls replay in the office and the Logbook; the Auditor's explanation and a question for each vendor appear on the
 quote cards; the Chaser's advice appears in the Timeline. The Chaser also reads messy DISCOM emails, and
 **Polish (AI)** rewords letters, rejected automatically if any number, date or reference changes.
+
+### Models, quotas and time limits
+
+The model is one setting (`ModelProvider`): **Gemini** by default, **Amazon Bedrock** with one parameter change; the
+agents, tools and hooks do not change. Free model quotas run out, and API Gateway gives up after 30 seconds, so:
+
+| Situation | What happens |
+|---|---|
+| A Gemini model hits its daily or per-minute quota, or is overloaded | the call moves down a chain of 7 Gemini models; a per-minute limit is retried once after Google's stated wait |
+| Every Gemini model is out | the text agents (review, DISCOM replies, polishing) move on to BazaarLink if its key is set; documents stay on Gemini |
+| A model garbles a tool call or a specialist runs out mid-review | the whole review restarts on the next model, so no half-finished answer is kept |
+| Reading an upload or a reply inside a request | 20 seconds of AI time, then the plain-rule reader answers, with a note saying so |
+| The agents' review (2 to 3 minutes) | the API Lambda starts it in the background and returns 202; the page polls until it is done |
+| Two saves race (a slow review and a person's edit) | every project has a version; DynamoDB conditional writes reject the stale save, which retries or asks the page to reload |
+| The AI reads a PDF | its numbers are checked against the plain-rule reader; a disagreement or a provisional bill is marked *unclear* for a person |
 
 ### How an agent waits three weeks
 
@@ -126,7 +151,7 @@ sequenceDiagram
   participant RD as Reader
   participant PL as Pipeline (plain code)
   UI->>API: upload bill (key + role checked, type sniffed, 6 MB cap)
-  API->>RD: offline rules, or Bedrock when live
+  API->>RD: offline rules, or the AI Reader when live (20 s, then rules)
   RD-->>API: month, units, amount, unclear?
   API->>PL: merge, recompute
   PL-->>UI: plan, audit, drafts, trace (the office replays it)
@@ -172,8 +197,9 @@ VITE_API_URL=http://localhost:8787 make dev-ui   # app on http://localhost:5173
 ```
 Try it with the specimen documents in `backend/samples/pdfs/` (12 bills, 3 quotations).
 
-**With the AI Reader**: set `BEDROCK_MODEL_ID` and `READER_MODE=live` in `.env` (see `.env.example`), then
-`python scripts/smoke_live.py`.
+**With the AI agents**: set `READER_MODE=live` and `GEMINI_API_KEY` in `.env` (optional backup:
+`BAZAARLINK_API_KEY`; or `MODEL_PROVIDER=bedrock` with `BEDROCK_MODEL_ID`; see `.env.example`), then
+`python scripts/smoke_live.py`. On AWS the keys live in SSM Parameter Store, never in the template or the code.
 
 **Deploy to AWS**: `make deploy` (SAM), then host `frontend/dist` on Amplify. Step by step: [docs/SETUP_AWS.md](docs/SETUP_AWS.md).
 
@@ -181,7 +207,7 @@ Try it with the specimen documents in `backend/samples/pdfs/` (12 bills, 3 quota
 
 | Check | Command | Result |
 |---|---|---|
-| Backend unit + API tests (reader, pipeline, roles, privacy, alarms, wake-up, live agents with fake models) | `make test` | 68 passing |
+| Backend unit + API tests (reader, pipeline, roles, privacy, alarms, wake-up, locking, model fallback, live agents with fake models) | `make test` | 85 passing |
 | Frontend tests (Vitest) | `make test-ui` | 32 passing |
 | Accuracy scoreboard: tools + offline reader on 18 specimen PDFs (12 bills, 6 quotations: 2 green, 2 amber, 2 red) | `make evals` | 30/30 |
 | Deployed API smoke test (S3 upload and read, Word, alarm created and removed) and a browser run on the live site | manual | passing |
@@ -231,7 +257,7 @@ docs/                architecture, privacy, rulebook verification, AWS setup, de
 |---|---|
 | Projects, uploads, offline reading, plan, audit, letters, approvals, timeline, roles, privacy controls | Working and tested |
 | AWS deployment: Amplify site, API Gateway, Lambdas, DynamoDB, S3, Scheduler alarms | **Live** (link above) and smoke-tested |
-| Live agents: Secretary calling Auditor and Chaser, Reader on photos, AI reply reading, polishing | Built, tested with fake models, and run against the real Bedrock API. Our new AWS account is still restricted from Bedrock ("Operation not allowed" on the Free plan), so the deployment runs in offline mode and says so on screen. Switch on with `ReaderMode=live` |
+| Live agents: Secretary calling Auditor and Chaser, Reader on PDFs and photos, AI reply reading, polishing | **Live on the deployment** with Gemini (free tier). When the day's free quota is used up, the text agents fall back to BazaarLink, and reading falls back to the plain-rule reader, with a note on screen. Bedrock is supported by one parameter; our new AWS account is not yet allowed to call it |
 | Vendor replies, the sample DISCOM reply, the time machine, the vendor list | Simulated or sample data, labelled on screen |
 | State-specific rules | Special-category subsidy loaded; other state rules are added only when verified |
 | Identity | Per-project keys and roles; add Cognito for verified sign-in |

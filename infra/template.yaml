@@ -3,6 +3,25 @@ Transform: AWS::Serverless-2016-10-31
 Description: SolarSabha backend (API, project state, uploads, scheduled wake-up). Deploy with `sam build && sam deploy --guided` from this folder.
 
 Parameters:
+  ModelProvider:
+    Type: String
+    Default: gemini
+    AllowedValues: [gemini, bedrock]
+    Description: The model behind the live agents. gemini uses the key in the SSM parameter below; bedrock uses BedrockModelId.
+  GeminiModelChain:
+    Type: String
+    Default: "gemini-3.5-flash,gemini-3.1-flash-lite,gemini-3.5-flash-lite,gemini-2.5-flash,gemini-2.5-flash-lite,gemini-flash-lite-latest,gemini-3-flash-preview"
+    Description: Gemini models in order; a quota or overload error moves to the next one.
+  GeminiKeyParam:
+    Type: String
+    Default: /solarsabha/gemini-api-key
+    AllowedPattern: '^/[A-Za-z0-9/_.-]+$'
+    Description: Name of the SecureString SSM parameter holding the Gemini API key (created outside this template).
+  BazaarlinkKeyParam:
+    Type: String
+    Default: ""
+    AllowedPattern: '^(/solarsabha/[A-Za-z0-9/_.-]+)?$'
+    Description: Optional backup for the text agents when every Gemini model is out of quota (BazaarLink model router). SecureString SSM parameter with its API key; empty = off.
   BedrockModelId:
     Type: String
     Default: ""
@@ -11,7 +30,7 @@ Parameters:
     Type: String
     Default: offline
     AllowedValues: [offline, live]
-    Description: offline = plain-rule PDF reader, no AI. live = Bedrock Reader agent (needs BedrockModelId and model access).
+    Description: offline = plain-rule PDF reader, no AI. live = the AI agents (Reader, Secretary, Auditor, Chaser) on ModelProvider.
   AllowedOrigin:
     Type: String
     Default: "*"
@@ -35,6 +54,10 @@ Globals:
         TABLE_NAME: !Ref StateTable
         UPLOADS_BUCKET: !Ref UploadsBucket
         BEDROCK_MODEL_ID: !Ref BedrockModelId
+        MODEL_PROVIDER: !Ref ModelProvider
+        GEMINI_MODEL_ID: !Ref GeminiModelChain
+        GEMINI_KEY_PARAM: !Ref GeminiKeyParam
+        BAZAARLINK_KEY_PARAM: !Ref BazaarlinkKeyParam
         READER_MODE: !Ref ReaderMode
         ALLOWED_ORIGIN: !Ref AllowedOrigin
         RETENTION_DAYS: !Ref RetentionDays
@@ -103,6 +126,10 @@ Resources:
   ApiFunction:
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: !Sub '${AWS::StackName}-api'
+      Timeout: 540                       # background agent reviews (8 min of AI time); API Gateway still answers within 30 s
+      EventInvokeConfig:
+        MaximumRetryAttempts: 0          # a failed background review is reported on the page, not silently run again
       CodeUri: ../backend/
       Handler: solarsabha.handlers.api.handler
       Environment:
@@ -128,6 +155,16 @@ Resources:
               Effect: Allow
               Action: iam:PassRole
               Resource: !GetAtt SchedulerInvokeRole.Arn
+            - Sid: ReadModelKeys
+              Effect: Allow
+              Action: ssm:GetParameter
+              Resource:
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GeminiKeyParam}'
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/solarsabha/*'
+            - Sid: RunReviewInBackground
+              Effect: Allow
+              Action: lambda:InvokeFunction
+              Resource: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-api'
       Events:
         Any:
           Type: HttpApi

@@ -47,7 +47,7 @@ export default function Documents({ project, session, canEdit, onSaved, notify }
         </button>
         <input ref={input} type="file" multiple accept="application/pdf,image/png,image/jpeg" hidden onChange={(e) => { upload(e.target.files); e.target.value = '' }} />
         <p className="fine">{project.result.reader_mode === 'live'
-          ? 'Read by the AI Reader on Amazon Bedrock. Check every value before you rely on it.'
+          ? `Read by the AI Reader (${project.result.ai_provider === 'bedrock' ? 'Amazon Bedrock' : 'Gemini'}), with the plain-rule reader as a fallback. Check every value before you rely on it.`
           : 'Read with plain rules (no AI): digital PDFs work; photos and scans need the AI Reader or typing in.'}</p>
       </div>
 

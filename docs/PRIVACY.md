@@ -33,8 +33,11 @@ it has opened (local storage); there are no tracking cookies.
   Individual originals can be deleted from Documents; the numbers read from them stay.
 - **Encryption**: DynamoDB and S3 encrypted at rest; the bucket denies non-TLS access and blocks public access.
 - **Logs**: one JSON line per request (method, route, status, time, project id); no document content, no names. 30-day retention.
-- **AI processing**: off by default (offline reader). When `READER_MODE=live`, documents go to Amazon Bedrock with an
-  India-only inference profile (`in.*`); Bedrock does not use them to train models.
+- **AI processing**: off by default (offline reader). When `READER_MODE=live`, documents and project facts go to the
+  configured model: Google's Gemini API by default (processed outside India; on the free tier Google may use content to
+  improve its products, so use a paid key for real society data), or Amazon Bedrock with an India-only inference profile
+  (`in.*`), which does not use them to train models. The optional backup (BazaarLink) receives project facts and DISCOM
+  replies, never uploaded documents, only when Gemini is out of quota. Model keys are stored encrypted in SSM.
 - **No outbound actions**: the code has no send, sign, pay or file function.
 
 ## Data principal rights (DPDP Act, 2023)

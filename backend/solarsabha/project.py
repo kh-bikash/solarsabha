@@ -27,6 +27,7 @@ MAX_FILE_BYTES = 6 * 1024 * 1024
 MAX_DOCUMENTS = 60
 AUDIT_CAP = 500
 EDIT_ROLES = ("secretary", "member")
+SYNC_AI_BUDGET = 20          # seconds of AI time inside a request (API Gateway gives up at 30 s)
 
 class ProjectError(Exception):
     def __init__(self, status: int, message: str):
@@ -45,13 +46,26 @@ def _hash(s: str) -> str:
 def retention_days() -> int:
     return int(os.environ.get("RETENTION_DAYS", "365"))
 
+def ai_provider() -> str:
+    return os.environ.get("MODEL_PROVIDER", "gemini")
+
+def ai_fallback() -> list[str]:
+    """Backup providers that join the end of the Gemini chain for the text agents (their key is set)."""
+    from .agents.factory import backups
+    return backups() if ai_provider() == "gemini" else []
+
+def ai_configured() -> bool:
+    if ai_provider() == "gemini":
+        return bool(os.environ.get("GEMINI_API_KEY") or os.environ.get("GEMINI_KEY_PARAM"))
+    return bool(os.environ.get("BEDROCK_MODEL_ID"))
+
 def reader_mode() -> str:
-    """'live' turns on the Bedrock agents (Reader, Secretary, Auditor, Chaser); anything else is the offline mode."""
-    return "live" if os.environ.get("READER_MODE") == "live" and os.environ.get("BEDROCK_MODEL_ID") else "offline"
+    """'live' turns on the AI agents (Reader, Secretary, Auditor, Chaser); anything else is the offline mode."""
+    return "live" if os.environ.get("READER_MODE") == "live" and ai_configured() else "offline"
 
 def require_live():
     if reader_mode() != "live":
-        raise ProjectError(409, "the live agents are switched off (offline mode). Set READER_MODE=live and BEDROCK_MODEL_ID.")
+        raise ProjectError(409, "the live agents are switched off (offline mode). Set READER_MODE=live and a model (Gemini key or Bedrock model).")
 
 def inputs_hash(doc: dict) -> str:
     """Changes whenever anything a review depends on changes."""
@@ -81,7 +95,7 @@ def create(pid: str, body) -> tuple[dict, str]:
         inputs = {"society": body.society.model_dump(), "bills": [], "quotes": [], "flat_areas_sqft": {},
                   "agm_date": "[date to be set by the committee]"}
         members = [{"name": body.you.name, "role": "secretary"}]
-        consent, actor = {"accepted": True, "by": body.you.name, "at": _now(), "notice_version": "2026-10"}, body.you.name
+        consent, actor = {"accepted": True, "by": body.you.name, "at": _now(), "notice_version": "2026-10c"}, body.you.name
     doc = {"id": pid, "schema": SCHEMA, "sample": body.sample, "created_at": _now(), "updated_at": _now(),
            "expires_at": time.time() + retention_days() * 86400, "key_hash": _hash(key), "consent": consent,
            "inputs": inputs, "members": members, "started_on": started.isoformat(), "sim_offset_days": 0,
@@ -132,6 +146,8 @@ def recompute(doc: dict) -> dict:
     out = run_offline(doc["inputs"], today_day=td, events=events_as_days(doc), discom_reply=doc.get("discom_reply"),
                       assumptions=doc.get("assumptions"), reply_reading=doc.get("reply_reading"))
     out["reader_mode"] = reader_mode()
+    out["ai_provider"] = ai_provider() if out["reader_mode"] == "live" else None
+    out["ai_fallback"] = ai_fallback() if out["reader_mode"] == "live" else []
     rv = doc.get("review")
     out["review_stale"] = bool(rv) and rv.get("input_hash") != inputs_hash(doc)
     out["clock"] = {"started_on": doc["started_on"], "today_day": td, "sim_offset_days": doc.get("sim_offset_days", 0),
@@ -178,20 +194,30 @@ def approve_draft(doc: dict, did: str, name: str):
 # ---------- live agents ----------
 
 def _agents_failed(e: Exception) -> ProjectError:
-    """Bedrock or agent errors become a clear message instead of a server error."""
+    """Model or agent errors become a clear message instead of a server error."""
     msg = getattr(e, "response", {}).get("Error", {}).get("Message") if hasattr(e, "response") else None
+    if not msg and (isinstance(e, TimeoutError) or (isinstance(e, RuntimeError) and ("quota" in str(e) or "busy" in str(e)))):
+        msg = str(e)
     return ProjectError(502, f"the agents could not run: {msg or type(e).__name__}. Nothing was changed.")
 
-def run_review(doc: dict, actor: str):
+def make_review(doc: dict, actor: str, budget: float | None = None) -> dict:
+    """Run the agents over a snapshot of the project and return the review record (does not change doc)."""
     require_live()
     from .agents import live
     try:
-        out = live.review(doc)
+        out = live.review(doc, budget)
     except Exception as e:
         raise _agents_failed(e)
-    doc["review"] = {"at": _now(), "by": actor, "input_hash": inputs_hash(doc), "mcp": out["mcp"], **out}
-    log(doc, actor, "asked the agents for a review", out["review"]["summary"][:120])
-    return recompute(doc)
+    return {"at": _now(), "by": actor, "input_hash": inputs_hash(doc), "mcp": out["mcp"], **out}
+
+def attach_review(doc: dict, rv: dict):
+    doc["review"] = rv
+    doc["review_job"] = {"status": "done", "finished_at": _now()}
+    log(doc, rv["by"], "asked the agents for a review", rv["review"]["summary"][:120])
+    return recompute(doc)                 # review_stale is true if the inputs changed while the agents worked
+
+def run_review(doc: dict, actor: str):
+    return attach_review(doc, make_review(doc, actor))
 
 def read_reply_live(doc: dict):
     """The Chaser agent's reading of the DISCOM reply; falls back to the rule-based reader if anything fails."""
@@ -200,7 +226,7 @@ def read_reply_live(doc: dict):
         return
     try:
         from .agents import live
-        out = live.read_reply(doc["discom_reply"], doc)
+        out = live.read_reply(doc["discom_reply"], doc, budget=SYNC_AI_BUDGET)
         doc["reply_reading"] = out["reading"]
     except Exception as e:
         log(doc, "Chaser", "live reading of the DISCOM reply failed; used the rule-based reader", type(e).__name__)
@@ -210,7 +236,7 @@ def polish_draft(doc: dict, did: str, actor: str):
     from .agents import live
     d = find_draft(doc, did)
     try:
-        out = live.polish(d, doc)
+        out = live.polish(d, doc, budget=SYNC_AI_BUDGET)
     except Exception as e:
         raise _agents_failed(e)
     if not out["ok"]:
@@ -236,11 +262,28 @@ def _live_read(kind: str, data: bytes, ctype: str) -> dict:
         f.write(data)
         path = f.name
     try:
-        fields = (read_bill if kind == "bill" else read_quote)(path).model_dump()
+        fields = (read_bill if kind == "bill" else read_quote)(path, budget=SYNC_AI_BUDGET).model_dump()
     finally:
         os.unlink(path)
-    return {"status": "NEEDS_REVIEW" if fields.get("unclear") else "READ", "reader": "live", "fields": fields,
-            "notes": fields.get("notes", "")}
+    notes = [fields.get("notes") or ""]
+    if kind == "bill":
+        fields["month"] = reading.normalize_month(fields.get("month"))
+    # Two independent readers: on digital PDFs, check the AI against the plain-rule reader.
+    rules = reading.read_document(kind, data, ctype) if ctype == "application/pdf" else {"fields": None}
+    rf = rules.get("fields")
+    if rf:
+        disagree = reading.cross_check(kind, fields, rf)
+        if disagree:
+            fields["unclear"] = True
+            notes.append("The AI and the rule-based reader disagree on " + ", ".join(disagree) + ": please check against the file.")
+        if kind == "bill" and "Provisional" in (rf.get("notes") or ""):
+            fields["unclear"] = True
+            notes.append("The bill is marked provisional: the meter was not read, so the units are an estimate.")
+        if kind == "quote" and rf.get("raw_text") and rf["raw_text"] not in (fields.get("raw_text") or ""):
+            fields["raw_text"] = ((fields.get("raw_text") or "") + "\n" + rf["raw_text"])[:100_000]   # hidden text too
+    note = " ".join(n for n in notes if n).strip()
+    fields["notes"] = note
+    return {"status": "NEEDS_REVIEW" if fields.get("unclear") else "READ", "reader": "live", "fields": fields, "notes": note}
 
 def add_document(doc: dict, kind: str, filename: str, content_b64: str, actor: str):
     if len(doc["documents"]) >= MAX_DOCUMENTS:

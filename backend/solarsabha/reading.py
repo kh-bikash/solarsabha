@@ -37,6 +37,26 @@ def _month(text):
         return f"{m.group(2)}-{MONTHS[m.group(1).lower()]:02d}"
     return None
 
+def normalize_month(value) -> str | None:
+    """Any month an AI or a person might write ('2026-09', 'Sep-2026', 'September 2026', '09/2026') as YYYY-MM."""
+    if not value:
+        return None
+    v = str(value).strip()
+    m = re.fullmatch(r"(20\d{2})[-/](0?[1-9]|1[0-2])", v)
+    if m:
+        return f"{m.group(1)}-{int(m.group(2)):02d}"
+    m = re.fullmatch(r"(0?[1-9]|1[0-2])[-/](20\d{2})", v)
+    if m:
+        return f"{m.group(2)}-{int(m.group(1)):02d}"
+    return _month(f"Bill Month: {v}")
+
+def cross_check(kind: str, ai: dict, rules: dict | None) -> list[str]:
+    """Compare the AI reader with the plain-rule reader on the same PDF. Returns the fields they disagree on."""
+    if not rules:
+        return []
+    keys = ("month", "units_kwh", "amount_inr") if kind == "bill" else ("capacity_kw", "total_price_inr", "advance_pct")
+    return [k for k in keys if rules.get(k) is not None and ai.get(k) is not None and rules[k] != ai[k]]
+
 def read_bill_text(text: str) -> dict:
     # a number counts as consumption only when 'kWh' follows it, so meter readings are never mistaken for units
     units = _first(rf"(?:units?\s*(?:consumed|billed)|consumption)\s*(?:\(kwh\))?\s*:?\s*{NUM}\s*(?:kwh|units)", text) \

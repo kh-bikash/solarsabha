@@ -1,14 +1,30 @@
 """Project state. Local JSON files for development, DynamoDB when running on AWS (STATE_BACKEND=dynamodb).
-Every project carries an expiry; expired projects read as missing and are cleaned up (DynamoDB TTL on AWS)."""
+
+- Expiry: every project carries expires_at; expired projects read as missing (DynamoDB TTL deletes them on AWS).
+- Optimistic locking: every project has a version. put() only succeeds if the stored version is still the one that
+  was read, so a slow request can never overwrite a newer save; it raises ConflictError instead."""
 import json, os, time, uuid
 from pathlib import Path
+
+class ConflictError(Exception):
+    """The project was changed by someone else after it was read."""
+
+def _next_version(doc: dict) -> tuple[int, int]:
+    expected = int(doc.get("version", 0))
+    return expected, expected + 1
 
 class LocalStore:
     def __init__(self, root: str | None = None):
         self.root = Path(root or os.environ.get("LOCAL_STATE_DIR", ".state")); self.root.mkdir(parents=True, exist_ok=True)
 
     def put(self, pid: str, doc: dict):
-        (self.root / f"{pid}.json").write_text(json.dumps(doc, default=str))
+        expected, new = _next_version(doc)
+        p = self.root / f"{pid}.json"
+        current = json.loads(p.read_text()).get("version", 0) if p.exists() else 0
+        if current != expected:
+            raise ConflictError(pid)
+        doc["version"] = new
+        p.write_text(json.dumps(doc, default=str))
 
     def get(self, pid: str) -> dict | None:
         p = self.root / f"{pid}.json"
@@ -29,13 +45,22 @@ class DynamoStore:
         self.table = boto3.resource("dynamodb").Table(os.environ["TABLE_NAME"])
 
     def put(self, pid: str, doc: dict):
-        item = {"pk": f"PROJECT#{pid}", "sk": "STATE", "doc": json.dumps(doc, default=str)}
+        expected, new = _next_version(doc)
+        doc["version"] = new
+        item = {"pk": f"PROJECT#{pid}", "sk": "STATE", "version": new, "doc": json.dumps(doc, default=str)}
         if doc.get("expires_at"):
             item["ttl"] = int(doc["expires_at"])          # DynamoDB TTL attribute (see template.yaml)
-        self.table.put_item(Item=item)
+        try:
+            if expected == 0:                             # new project, or one saved before versions existed
+                self.table.put_item(Item=item, ConditionExpression="attribute_not_exists(pk) OR attribute_not_exists(version)")
+            else:
+                self.table.put_item(Item=item, ConditionExpression="version = :v", ExpressionAttributeValues={":v": expected})
+        except self.table.meta.client.exceptions.ConditionalCheckFailedException:
+            doc["version"] = expected
+            raise ConflictError(pid)
 
     def get(self, pid: str) -> dict | None:
-        r = self.table.get_item(Key={"pk": f"PROJECT#{pid}", "sk": "STATE"}).get("Item")
+        r = self.table.get_item(Key={"pk": f"PROJECT#{pid}", "sk": "STATE"}, ConsistentRead=True).get("Item")
         if not r:
             return None
         doc = json.loads(r["doc"])

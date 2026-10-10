@@ -11,10 +11,10 @@ Sample data is fictional and labelled on screen ("Sample society", "Simulated", 
 | 1:35-1:55 | Negotiation room (SIMULATION), Your desk: approve, Word download, notice pinned | "The agent drafts counters and letters. A named committee member approves. Nothing is ever sent by the app." |
 | 1:55-2:30 | time machine +40 days: night, alarm, Chaser escalation; paste the DISCOM reply; Plan v2 | "Agents don't wait for weeks: they save notes and set an alarm. The Chaser wakes, sees the delay, drafts an escalation, and re-plans when the DISCOM limits capacity." |
 | 2:30-2:50 | Settings: members and roles, export, delete; Logbook: who did what | "Each society's data is behind its own access key, with roles, a full activity log, export and delete." |
-| 2:50-3:00 | architecture diagram; the live site URL; "30/30" scoreboard | "Strands agents, Bedrock, Lambda, DynamoDB, S3, EventBridge. People approve everything." |
+| 2:50-3:00 | architecture diagram; the live site URL; "30/30" scoreboard | "Strands agents on Gemini, Lambda, DynamoDB, S3, EventBridge. People approve everything." |
 
 ## Say what is simulated
 Vendor replies in the negotiation room, the DISCOM reply in the sample, the clock (time machine), and the vendor list.
-If Bedrock is open on the account by then, record Ask the agents to review (the Secretary calling the Auditor and the
-Chaser, replayed in the office) in the 1:05-1:35 slot. If not, say: "In this recording the documents are read by our
-offline reader; the agents are switched on with one setting."
+Record Ask the agents to review (the Secretary calling the Auditor and the Chaser, replayed in the office) in the
+1:05-1:35 slot. Record early in the day, when the free Gemini quota is fresh; if the screen shows the plain-rule reader
+took over, say so: "The free AI quota ran out, so the plain-rule reader answered; nothing else changes."

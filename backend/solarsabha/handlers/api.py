@@ -40,7 +40,11 @@ from .. import project as P
 from .. import rules, schemas as S
 from ..export import draft_docx, draft_filename
 from ..files import get_files
-from ..state import get_store, new_id
+from ..state import ConflictError, get_store, new_id
+
+# AI time for a background review; the Lambda timeout (template.yaml) leaves a minute to save the result
+REVIEW_JOB_BUDGET = 480
+REVIEW_JOB_STALE = 600       # a job still "running" after this died with its Lambda; a new review may start
 
 log = logging.getLogger("solarsabha.api")
 if not log.handlers:
@@ -205,7 +209,60 @@ def r_draft_approve(ev, store, doc, actor, m):
     return _save(store, P.approve_draft(doc, m.group(1), P.member(doc, b.name)["name"]))
 
 def r_review(ev, store, doc, actor, m):
-    return _save(store, P.run_review(doc, actor))
+    P.require_live()
+    fn = os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
+    if not fn:                                       # local: run it now
+        return _save(store, P.run_review(doc, actor))
+    # On AWS the HTTP API gives up after 30 s and a multi-agent review can take longer, so it runs in the background:
+    # this Lambda invokes itself asynchronously and the page polls the project until review_job is no longer running.
+    job = doc.get("review_job") or {}
+    if job.get("status") == "running" and not _job_stale(job):
+        raise P.ProjectError(409, "the agents are already reviewing this project")
+    doc["review_job"] = {"status": "running", "by": actor, "started_at": P._now()}
+    store.put(doc["id"], doc)
+    import boto3
+    boto3.client("lambda").invoke(FunctionName=fn, InvocationType="Event",
+                                  Payload=json.dumps({"solarsabha_job": "review", "project_id": doc["id"], "actor": actor}).encode())
+    return _resp(202, P.public(doc))
+
+def _job_stale(job: dict) -> bool:
+    from datetime import datetime, timezone
+    try:
+        started = datetime.fromisoformat(job["started_at"])
+    except (KeyError, TypeError, ValueError):
+        return True
+    return (datetime.now(timezone.utc) - started).total_seconds() > REVIEW_JOB_STALE
+
+def run_review_job(event: dict) -> dict:
+    """The background half of r_review. Works on a snapshot, then attaches the result to the latest saved project so
+    edits made meanwhile are kept (the review is then marked out of date)."""
+    store, pid = get_store(), event["project_id"]
+    snapshot = store.get(pid)
+    if not snapshot:
+        return {"ok": False}
+    rv, failure = None, None
+    try:
+        rv = P.make_review(snapshot, event["actor"], budget=REVIEW_JOB_BUDGET)
+    except P.ProjectError as e:
+        failure = e.message
+    except Exception:
+        log.exception(json.dumps({"event": "review_job_failed", "project": pid}))
+        failure = "something went wrong on our side"
+    for _ in range(5):                                   # attach to the latest saved project; retry if it moves
+        doc = store.get(pid)
+        if not doc:
+            return {"ok": False}
+        if rv:
+            doc = P.attach_review(doc, rv)
+        else:
+            doc["review_job"] = {"status": "failed", "error": failure, "finished_at": P._now()}
+        try:
+            doc["alarm_at"] = alarm.sync(doc)
+            store.put(pid, doc)
+            return {"ok": bool(rv)}
+        except ConflictError:
+            continue
+    return {"ok": False}
 
 def r_draft_polish(ev, store, doc, actor, m):
     return _save(store, P.polish_draft(doc, m.group(1), actor))
@@ -263,6 +320,8 @@ def _route(event: dict, method: str, path: str):
     raise P.ProjectError(404, "not found")
 
 def handler(event, context=None):
+    if event.get("solarsabha_job") == "review":
+        return run_review_job(event)
     started, rid = time.time(), uuid.uuid4().hex[:12]
     method = event.get("requestContext", {}).get("http", {}).get("method") or event.get("httpMethod", "GET")
     path = event.get("rawPath") or event.get("path", "/")
@@ -271,6 +330,9 @@ def handler(event, context=None):
         resp, pid = _route(event, method, path)
     except P.ProjectError as e:
         resp = _resp(e.status, {"error": e.message, "request_id": rid})
+    except ConflictError:
+        resp = _resp(409, {"error": "this project was changed by someone else a moment ago. It has been reloaded; please try again.",
+                           "conflict": True, "request_id": rid})
     except Exception:
         log.exception(json.dumps({"event": "unhandled_error", "request_id": rid, "method": method}))
         resp = _resp(500, {"error": "something went wrong on our side", "request_id": rid})

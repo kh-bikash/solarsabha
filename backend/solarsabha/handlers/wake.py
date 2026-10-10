@@ -8,23 +8,28 @@ import logging
 
 from .. import alarm
 from .. import project as P
-from ..state import get_store
+from ..state import ConflictError, get_store
 
 log = logging.getLogger("solarsabha.wake")
 
 def handler(event, context=None):
     pid = event.get("project_id")
     store = get_store()
-    doc = store.get(pid) if pid else None
-    if not doc:
-        return {"ok": False, "reason": "unknown or expired project"}
-    before = doc.get("result", {}).get("next_action", {})
-    doc = P.recompute(doc)
-    after = doc["result"]["next_action"]
-    if after != before:
-        P.log(doc, "Chaser (scheduled)", "woke up and re-checked the timeline",
-              f"{after['label']}: {after['status'].lower()}" + (f", {after['overdue_by']} days late" if after.get("overdue_by") else ""))
-    doc["alarm_at"] = alarm.sync(doc)               # set the next alarm
-    store.put(pid, doc)
+    for _ in range(5):                               # retry if a person saves at the same moment
+        doc = store.get(pid) if pid else None
+        if not doc:
+            return {"ok": False, "reason": "unknown or expired project"}
+        before = doc.get("result", {}).get("next_action", {})
+        doc = P.recompute(doc)
+        after = doc["result"]["next_action"]
+        if after != before:
+            P.log(doc, "Chaser (scheduled)", "woke up and re-checked the timeline",
+                  f"{after['label']}: {after['status'].lower()}" + (f", {after['overdue_by']} days late" if after.get("overdue_by") else ""))
+        doc["alarm_at"] = alarm.sync(doc)           # set the next alarm
+        try:
+            store.put(pid, doc)
+            break
+        except ConflictError:
+            continue
     log.info(json.dumps({"event": "wake", "project": pid, "next_action": after}))
     return {"ok": True, "next_action": after}

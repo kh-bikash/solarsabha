@@ -34,12 +34,18 @@ def tool_result_text(result) -> str:
     out = " ".join(parts)
     return f"[{result.get('status')}] {out}" if result and result.get("status") == "error" else out
 
+def _is_answer(event) -> bool:
+    from strands.tools.structured_output.structured_output_tool import StructuredOutputTool
+    return isinstance(getattr(event, "selected_tool", None), StructuredOutputTool)
+
 class TraceHooks:
     """Strands hook provider for one agent.
 
     - Guardrail: before a tool runs, anything outside this agent's allowlist is cancelled (and recorded), so no
       document or prompt can make an agent call a tool it was not given.
-    - Recorder: after a tool runs, its input and real output are added to the trace."""
+    - Recorder: after a tool runs, its input and real output are added to the trace.
+    The agent's own answer form (Strands' structured-output tool, named after the answer model) is always allowed and is
+    not recorded: it is how the agent returns its result, not an action."""
 
     def __init__(self, trace: Trace | None, agent_name: str, allowed: set[str] | None = None):
         self.trace, self.agent_name, self.allowed = trace, agent_name, allowed
@@ -51,13 +57,15 @@ class TraceHooks:
 
     def before_tool(self, event):
         name = event.tool_use.get("name")
+        if _is_answer(event):
+            return
         if self.allowed is not None and name not in self.allowed:
             event.cancel_tool = f"Tool '{name}' is not allowed for the {self.agent_name}."
             if self.trace:
                 self.trace.note(self.agent_name, f"Blocked a call to '{name}': not one of its tools.")
 
     def after_tool(self, event):
-        if self.trace is None:
+        if self.trace is None or _is_answer(event):
             return
         self.trace.events.append({"t": self.trace._t(), "agent": self.agent_name, "tool": event.tool_use.get("name"),
                                   "input": _short(event.tool_use.get("input")), "output": _short(tool_result_text(event.result))})

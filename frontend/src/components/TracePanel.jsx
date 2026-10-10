@@ -4,6 +4,9 @@ import { AGENT_COLOR } from '../office/story.js'
 const when = (iso) => new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 
 // The logbook: what the office did (agent trace, plain words) and what people did (activity log).
+// 'bazaarlink:qwen/qwen3.7-flash:free' -> 'qwen/qwen3.7-flash:free via bazaarlink'; Gemini ids have no provider prefix
+const modelName = (m) => (m.includes(':') && !m.startsWith('gemini') ? `${m.split(':').slice(1).join(':')} via ${m.split(':')[0]}` : m)
+
 export default function TracePanel({ played, current, mode, audit, review, stale }) {
   const [tab, setTab] = useState('agents')
   const rows = current ? [...played, current] : played
@@ -29,7 +32,7 @@ export default function TracePanel({ played, current, mode, audit, review, stale
             ))}
           </ol>
           <p className="fine">{mode === 'offline'
-            ? 'This run uses the offline pipeline, so every step here is ordinary code. In live mode the Reader, Auditor and Chaser run on a Bedrock model, and their tool calls appear here the same way.'
+            ? 'This run uses the offline pipeline, so every step here is ordinary code. In live mode the Reader, Auditor and Chaser run on an AI model, and their tool calls appear here the same way.'
             : 'Live run: notes come from the agents; numbers still come from the plain-code tools.'}</p>
         </>
       ) : (
@@ -50,13 +53,13 @@ export default function TracePanel({ played, current, mode, audit, review, stale
 function Review({ review, stale, mode }) {
   if (!review) {
     return <p className="fine">{mode === 'live'
-      ? 'No review yet. Use "Ask the agents to review": the Secretary calls the Auditor and the Chaser on Amazon Bedrock.'
+      ? 'No review yet. Use "Ask the agents to review": the Secretary calls the Auditor and the Chaser.'
       : 'Live agents are off in this deployment, so there is no AI review. Everything else runs on plain, tested code.'}</p>
   }
   const rv = review.review
   return (
     <div className="review">
-      <p className="fine">Asked by {review.by} on {when(review.at)}{review.mcp ? ' · SolarRules MCP tools attached' : ''}
+      <p className="fine">Asked by {review.by} on {when(review.at)}{review.model ? ` · model ${modelName(review.model)}` : ''}{review.mcp ? ' · SolarRules MCP tools attached' : ''}
         {stale && <b className="warn-text"> · out of date: the inputs changed after this review</b>}</p>
       <h4>Summary</h4><p>{rv.summary}</p>
       <h4>Next step with the DISCOM</h4><p>{rv.next_step}</p>

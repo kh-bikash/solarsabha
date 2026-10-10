@@ -37,7 +37,7 @@ def review_answer(prompt, model):
 def live_env(tmp_path, monkeypatch):
     monkeypatch.setenv("LOCAL_STATE_DIR", str(tmp_path))
     monkeypatch.setenv("READER_MODE", "live")
-    monkeypatch.setenv("BEDROCK_MODEL_ID", "in.anthropic.test")
+    monkeypatch.setenv("MODEL_PROVIDER", "gemini"); monkeypatch.setenv("GEMINI_API_KEY", "test-key")
     @contextmanager
     def no_mcp():
         raise RuntimeError("no MCP in tests")
@@ -63,6 +63,7 @@ def test_review_runs_secretary_and_specialists_and_records_real_outputs(live_env
 
 def test_review_needs_live_mode(tmp_path, monkeypatch):
     monkeypatch.setenv("LOCAL_STATE_DIR", str(tmp_path)); monkeypatch.delenv("READER_MODE", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     _, d = call("POST", "/projects", {"sample": True})
     code, body = call("POST", f"/projects/{d['id']}/review", {}, key=d["access_key"], actor="Meera (sample)")
     assert code == 409 and "offline" in body["error"]
@@ -91,11 +92,11 @@ def test_polish_keeps_facts_or_is_rejected(live_env, monkeypatch):
     _, d = call("GET", f"/projects/{pid}", key=key)
     draft = d["drafts"][0]
     kept = draft["body"].replace("Notice is hereby given", "Notice is hereby given, with respect,")
-    monkeypatch.setattr(factory, "build_secretary", lambda trace, extra_tools=None: FakeAgent(trace, "Secretary", {}, lambda p, m: PolishedLetter(body=kept)))
+    monkeypatch.setattr(factory, "build_writer", lambda trace: FakeAgent(trace, "Secretary", {}, lambda p, m: PolishedLetter(body=kept)))
     code, d = call("POST", f"/projects/{pid}/drafts/{draft['id']}/polish", {}, key=key, actor="Meera (sample)")
     assert code == 200 and d["drafts"][0]["edited_by"] == "Secretary (AI)" and "with respect" in d["drafts"][0]["body"]
     changed = kept.replace("36 kW", "40 kW")
-    monkeypatch.setattr(factory, "build_secretary", lambda trace, extra_tools=None: FakeAgent(trace, "Secretary", {}, lambda p, m: PolishedLetter(body=changed)))
+    monkeypatch.setattr(factory, "build_writer", lambda trace: FakeAgent(trace, "Secretary", {}, lambda p, m: PolishedLetter(body=changed)))
     code, body = call("POST", f"/projects/{pid}/drafts/{draft['id']}/polish", {}, key=key, actor="Meera (sample)")
     assert code == 422 and "unchanged" in body["error"]
 
@@ -113,3 +114,67 @@ def test_facts_unchanged_check():
     assert live.facts_unchanged("Pay Rs 11,52,000 by 20-Oct-2026 (ref NV/26/04417).", "Kindly pay Rs 11,52,000 by 20-Oct-2026, ref NV/26/04417.")
     assert not live.facts_unchanged("36 kW for Rs 18,00,000", "40 kW for Rs 18,00,000")
     assert not live.facts_unchanged("36 kW", "36 kW in 2 weeks")
+
+def test_review_runs_in_the_background_on_lambda_and_keeps_edits(live_env, monkeypatch):
+    pid, key = live_env
+    invoked = []
+    class FakeLambda:
+        def invoke(self, FunctionName, InvocationType, Payload):
+            invoked.append((FunctionName, InvocationType, json.loads(Payload)))
+    import boto3
+    monkeypatch.setattr(boto3, "client", lambda name, *a, **k: FakeLambda())
+    monkeypatch.setenv("AWS_LAMBDA_FUNCTION_NAME", "solarsabha-api")
+    code, d = call("POST", f"/projects/{pid}/review", {}, key=key, actor="Arjun (sample)")
+    assert code == 202 and d["review_job"]["status"] == "running" and invoked[0][1] == "Event"
+    assert call("POST", f"/projects/{pid}/review", {}, key=key, actor="Arjun (sample)")[0] == 409      # already running
+    from solarsabha import project as P
+    original = P.make_review
+    def edit_while_agents_work(snapshot, actor, budget=None):
+        rv = original(snapshot, actor, budget)
+        call("PUT", f"/projects/{pid}/assumptions", {"tariff": 8.5}, key=key, actor="Arjun (sample)")   # a member edits meanwhile
+        return rv
+    monkeypatch.setattr(P, "make_review", edit_while_agents_work)
+    assert handler(invoked[0][2]) == {"ok": True}                                                    # the async half
+    code, d = call("GET", f"/projects/{pid}", key=key)
+    assert d["review_job"]["status"] == "done" and d["review"]["review"]["vendor_notes"]
+    assert d["assumptions"]["tariff"] == 8.5                    # the edit made during the review was kept
+    assert d["result"]["review_stale"] is True                  # and the review knows it predates that edit
+
+def test_live_upload_normalises_month_and_cross_checks_with_the_rule_reader(live_env, monkeypatch):
+    import base64
+    from pathlib import Path
+    from solarsabha.agents import reader
+    from solarsabha.agents.models import BillData
+    pid, key = live_env
+    # what the real Gemini reader did on this bill: month as "Sep-2026", provisional not flagged; plus a wrong amount
+    monkeypatch.setattr(reader, "read_bill", lambda path, trace=None, budget=None: BillData(month="Sep-2026", units_kwh=4300, amount_inr=33000, unclear=False))
+    pdf = (Path(__file__).resolve().parents[1] / "samples" / "pdfs" / "bill_2026-09.pdf").read_bytes()
+    code, d = call("POST", f"/projects/{pid}/documents", {"kind": "bill", "filename": "bill_2026-09.pdf",
+                   "content_base64": base64.b64encode(pdf).decode()}, key=key, actor="Meera (sample)")
+    assert code == 200
+    doc = d["documents"][-1]
+    assert doc["reader"] == "live" and doc["status"] == "NEEDS_REVIEW"
+    assert "disagree on amount_inr" in doc["notes"] and "provisional" in doc["notes"]
+    bill = next(b for b in d["inputs"]["bills"] if b["month"] == "2026-09")
+    assert bill["unclear"] is True
+
+def test_slow_ai_hits_the_time_budget(monkeypatch):
+    import time as _t
+    monkeypatch.setenv("MODEL_PROVIDER", "gemini"); monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    factory._exhausted.clear()
+    with pytest.raises(factory.AITimeout):
+        factory.run_with_fallback(lambda: _t.sleep(2), budget=0.5)
+
+def test_upload_falls_back_to_the_rule_reader_when_the_ai_is_too_slow(live_env, monkeypatch):
+    import base64
+    from pathlib import Path
+    from solarsabha.agents import reader
+    pid, key = live_env
+    def too_slow(path, trace=None, budget=None):
+        raise factory.AITimeout("the AI did not answer in time")
+    monkeypatch.setattr(reader, "read_bill", too_slow)
+    pdf = (Path(__file__).resolve().parents[1] / "samples" / "pdfs" / "bill_2025-10.pdf").read_bytes()
+    code, d = call("POST", f"/projects/{pid}/documents", {"kind": "bill", "filename": "bill_2025-10.pdf",
+                   "content_base64": base64.b64encode(pdf).decode()}, key=key, actor="Meera (sample)")
+    doc = d["documents"][-1]
+    assert code == 200 and doc["reader"] == "offline" and doc["status"] == "READ" and "AITimeout" in doc["notes"]

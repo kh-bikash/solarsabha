@@ -10,6 +10,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
+sys.path.insert(0, str(ROOT / "scripts"))
+from _env import load_env
+load_env()
 from solarsabha import reading
 from solarsabha.pipeline import load_sample_inputs
 from solarsabha.tools import quotes, sizing

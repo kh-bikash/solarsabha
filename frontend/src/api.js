@@ -21,6 +21,7 @@ async function call(session, method, path, body) {
     throw new ApiError(0, 'Cannot reach the SolarSabha API. Is it running?')
   }
   const data = await r.json().catch(() => ({}))
+  if (r.status === 409 && data.conflict) window.dispatchEvent(new CustomEvent('solarsabha:conflict'))   // someone saved first
   if (!r.ok) throw new ApiError(r.status, data.error || `Request failed (${r.status})`)
   return data
 }

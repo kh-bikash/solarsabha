@@ -3,6 +3,9 @@ Usage: BEDROCK_MODEL_ID=<id> AWS_REGION=ap-south-1 python scripts/smoke_live.py"
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _env import load_env
+load_env()
 from solarsabha.agents import factory
 from solarsabha.agents.mcp_tools import solar_rules_mcp
 from solarsabha.trace import Trace

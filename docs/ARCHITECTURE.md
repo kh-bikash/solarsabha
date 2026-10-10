@@ -14,12 +14,17 @@ flowchart LR
     DDB[("DynamoDB<br/>project state, TTL")]
     S3[("S3<br/>uploaded bills and quotes")]
     SCHED["EventBridge Scheduler<br/>solarsabha-&lt,id&gt, alarms"]
-    BR["Amazon Bedrock<br/>in.anthropic.* profile"]
+    SSM["SSM Parameter Store<br/>/solarsabha/* model keys"]
   end
+  GEM["Gemini API<br/>7-model fallback chain"]
+  BAK["BazaarLink<br/>text-only backup"]
   UI -- "x-project-key, x-actor" --> APIGW --> API
   API --> DDB
   API --> S3
-  API -- "READER_MODE=live" --> BR
+  API -. "keys" .-> SSM
+  API -- "async self-invoke: review job" --> API
+  API -- "READER_MODE=live" --> GEM
+  GEM -. "all out of quota" .-> BAK
   API -- "set / move alarm" --> SCHED
   SCHED -- "at(due date)" --> WAKE --> DDB
   WAKE -- "next alarm" --> SCHED
@@ -30,7 +35,7 @@ Inside the API Lambda:
 ```mermaid
 flowchart TB
   R["router + validation<br/>handlers/api.py, schemas.py"] --> PJ["project layer<br/>project.py: keys, roles, consent,<br/>documents, drafts, clock, audit log"]
-  PJ --> RD["reader<br/>reading.py (offline rules)<br/>agents/reader.py (live, Strands + Bedrock)"]
+  PJ --> RD["reader<br/>reading.py (offline rules)<br/>agents/reader.py (live, Strands + Gemini)"]
   PJ --> PL["pipeline.py<br/>pure: inputs in, result out"]
   PL --> T["plain-code tools<br/>sizing, quotes, fairness,<br/>negotiation, timeline, drafts"]
   T --> RB["rulebook.json<br/>national + state overrides"]
@@ -89,7 +94,7 @@ sequenceDiagram
   UI->>API: POST /documents {kind, filename, base64}
   API->>API: check key and role, size, file type (magic bytes)
   API->>F: store original
-  API->>RD: offline rules, or Bedrock Reader when live
+  API->>RD: offline rules, or the AI Reader when live (20 s budget, then rules; cross-checked)
   RD-->>API: fields + READ / NEEDS_REVIEW / NEEDS_ENTRY
   API->>PL: merge into bills/quotes, recompute
   PL-->>API: plan, audit, drafts, trace
@@ -135,24 +140,31 @@ stateDiagram-v2
 sequenceDiagram
   participant P as Committee member
   participant API as API Lambda
-  participant SEC as Sabha Secretary (Bedrock)
+  participant SEC as Sabha Secretary (Gemini)
   participant AUD as Auditor
   participant CHS as Chaser
   participant T as Plain-code tools / SolarRules MCP
   P->>API: POST /review ("Ask the agents to review")
+  API-->>P: 202, review_job running (the page polls)
+  API->>API: background invocation of itself (no 30 s limit)
   API->>SEC: project facts as JSON (data, not instructions)
   SEC->>AUD: explain each quote
   AUD->>T: audit_quote, check_vendor, get_rule
   SEC->>CHS: what next with the DISCOM?
   CHS->>T: build_timeline, next_action
   SEC-->>API: structured LiveReview (summary, vendor notes, next step, not verified)
+  API->>API: save with a version check (retry on conflict)
   API-->>P: review + every tool call with its real output (office replay, Logbook)
 ```
 
 - `TraceHooks` (Strands hooks) record each tool call with its real output and **cancel any tool outside an agent's allowlist**.
 - A DISCOM reply is read by the Chaser agent into a structured `ReplyReading`; if the agent fails, the rule-based reader is used.
 - "Polish (AI)" rewords a letter; `facts_unchanged()` rejects the result if any number, date or reference changed.
-- If Bedrock refuses (for example a restricted account), the API returns a clear 502 and nothing is changed.
+- Specialists are built fresh for each call and run one at a time, so the trace stays in order.
+- Model errors are classified: a daily quota marks the model used up for this container, a per-minute limit waits once,
+  an overload or a garbled tool call moves on. If a specialist runs out mid-review, the whole review restarts on the next
+  model. BazaarLink joins the end of the chain for text only; documents never go to it.
+- If no model can answer, the API returns a clear 502 (or the plain-rule reader answers) and nothing is changed.
 
 ## Human checkpoints (guide, Section 17)
 

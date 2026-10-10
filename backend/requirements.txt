@@ -5,5 +5,9 @@ pydantic>=2.5
 # Text extraction from digital PDFs (the offline reader) and Word export of drafts.
 pypdf>=5,<7
 python-docx>=1.1,<2
-# The live Reader agent (READER_MODE=live) runs on Strands with a Bedrock model.
+# The live agents (READER_MODE=live) run on Strands with Gemini (default) or a Bedrock model.
 strands-agents==1.58.0
+google-genai>=1.0,<3
+openai>=1.68,<3
+# The SolarRules MCP server uses FastMCP, which MCP 2.x removed; strands-agents does not pin it.
+mcp>=1.0,<2
