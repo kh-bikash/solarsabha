@@ -207,7 +207,7 @@ Try it with the specimen documents in `backend/samples/pdfs/` (12 bills, 3 quota
 
 | Check | Command | Result |
 |---|---|---|
-| Backend unit + API tests (reader, pipeline, roles, privacy, alarms, wake-up, locking, model fallback, live agents with fake models) | `make test` | 85 passing |
+| Backend unit + API tests (reader, pipeline, roles, privacy, alarms, wake-up, locking, model fallback, live agents with fake models) | `make test` | 87 passing |
 | Frontend tests (Vitest) | `make test-ui` | 32 passing |
 | Accuracy scoreboard: tools + offline reader on 18 specimen PDFs (12 bills, 6 quotations: 2 green, 2 amber, 2 red) | `make evals` | 30/30 |
 | Deployed API smoke test (S3 upload and read, Word, alarm created and removed) and a browser run on the live site | manual | passing |

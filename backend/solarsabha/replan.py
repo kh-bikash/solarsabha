@@ -4,11 +4,16 @@ import re
 from .tools import sizing
 
 LOAD_PATTERN = re.compile(r"sanctioned\s+load.{0,200}?(\d+(?:\.\d+)?)\s*kw", re.I | re.S)
+# "can permit only upto 30 kW", "maximum permissible ... 25 kW", "restricted to 20 kW"
+CAP_PATTERN = re.compile(r"(?:permit\w*|permissible|allow\w*|restrict\w*|limit\w*|only|max\w*|up\s*to|upto)"
+                         r"[^.\d]{0,40}?(\d+(?:\.\d+)?)\s*kw", re.I)
+CONSTRAINT_WORDS = ["insufficient", "inadequate", "too low", "exceed", "not sufficient", "limit", "constrain",
+                    "restrict", "permit only", "only up", "only upto", "maximum permissible"]
 
 def classify_reply(text: str) -> dict:
     t = text.lower()
-    m = LOAD_PATTERN.search(text)
-    if m and any(w in t for w in ["insufficient", "inadequate", "too low", "exceed", "not sufficient", "limit"]):
+    m = LOAD_PATTERN.search(text) or CAP_PATTERN.search(text)
+    if m and any(w in t for w in CONSTRAINT_WORDS):
         return {"type": "LOAD_LIMIT", "max_kw": float(m.group(1))}
     if any(w in t for w in ["approved", "feasibility granted", "feasible"]):
         return {"type": "APPROVED"}

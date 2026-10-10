@@ -57,7 +57,7 @@ an encrypted private S3 bucket; EventBridge Scheduler for the Chaser's alarms; G
 
 - 30/30 on our accuracy scoreboard: the plain-code tools plus the offline reader on 18 specimen documents (12 bills,
   6 quotations with known answers: two green, two amber, two red).
-- 85 backend and 32 frontend tests in CI on every push.
+- 87 backend and 32 frontend tests in CI on every push.
 - For the sample society: 36 kW, Rs 11.52 lakh after a Rs 6.48 lakh subsidy, about 3.3 years simple payback,
   about 36 tonnes of CO2 avoided a year (CEA factor 0.710 t/MWh). These are computed, not measured outcomes.
 
