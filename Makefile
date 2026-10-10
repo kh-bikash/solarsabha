@@ -19,6 +19,8 @@ dev-ui:       ## UI on :5173. Static demo by default; VITE_API_URL=http://localh
 	cd frontend && npm run dev
 build-ui:
 	cd frontend && npm run build
+tech-doc:     ## rebuild docs/SolarSabha_Technical_Guide.pdf
+	python scripts/build_tech_doc.py
 lint-infra:
 	cfn-lint infra/template.yaml
 check: test test-ui evals lint-infra build-ui   ## everything CI runs

@@ -64,6 +64,7 @@ Parameters:
 | `BedrockModelId` | empty | inference profile id when `ModelProvider=bedrock` |
 | `AllowedOrigin` | `*` | set to your site's origin (the Amplify URL) for production |
 | `RetentionDays` | `365` | projects and files are deleted automatically after this |
+| `AlarmEmail` | empty | email for CloudWatch alarm notifications (see section 6) |
 
 It creates: the HTTP API (throttled), the API and wake-up Lambdas, a DynamoDB table (TTL, point-in-time recovery,
 encryption, conditional writes for optimistic locking), a private encrypted S3 bucket (TLS only, lifecycle expiry), the
@@ -85,7 +86,23 @@ After every change the API sets a one-time EventBridge schedule `solarsabha-<pro
 due (or a week later if it is already late). It invokes the wake-up Lambda, which recomputes the project, logs what the
 Chaser found, and sets the next alarm. Deleting a project removes its schedule. Code: `backend/solarsabha/alarm.py`.
 
-## 6. Deliberately not used
+## 6. Alarms (CloudWatch)
+Six alarms watch the deployment and notify one SNS topic (`AlertsTopic`). Deploy with `AlarmEmail=you@example.com` to get
+them by email (AWS first sends a confirmation link; click it). With no email the alarms still show in CloudWatch.
+
+| Alarm | Fires when |
+|---|---|
+| `solarsabha-unhandled-errors` | the API hit an unhandled exception (log metric on `unhandled_error`) |
+| `solarsabha-review-failures` | 3 or more agent reviews failed in an hour (usually every AI model out of quota) |
+| `solarsabha-api-lambda-errors` | the API Lambda crashed or timed out |
+| `solarsabha-api-lambda-throttles` | Lambda refused requests for lack of concurrency |
+| `solarsabha-wake-lambda-errors` | a scheduled Chaser wake-up failed |
+| `solarsabha-api-5xx` | 10 or more server errors in 5 minutes at API Gateway |
+
+Handled errors (bad input, wrong key, a 502 when no model can answer) are answered by the API itself, so the log metrics
+pick out real bugs. Missing data counts as OK, so a quiet night raises nothing. Ten alarms are in the CloudWatch free tier.
+
+## 7. Deliberately not used
 - **SES / sending**: the product never sends anything; letters are downloaded and sent by a person.
 - **Step Functions**: approvals are stored state and waiting is done by the scheduler, so no long-running workflow is needed.
   The one long task (the agents' review) runs as an asynchronous self-invocation of the API Lambda.

@@ -41,6 +41,14 @@ Parameters:
     MinValue: 1
     MaxValue: 3650
     Description: Projects and their files are deleted automatically this many days after creation.
+  AlarmEmail:
+    Type: String
+    Default: ""
+    AllowedPattern: '^([^@\s]+@[^@\s]+\.[^@\s]+)?$'
+    Description: Email for CloudWatch alarm notifications (AWS sends a confirmation link first). Empty = alarms only, no email.
+
+Conditions:
+  HasAlarmEmail: !Not [!Equals [!Ref AlarmEmail, ""]]
 
 Globals:
   Function:
@@ -225,7 +233,135 @@ Resources:
                 Action: lambda:InvokeFunction
                 Resource: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-wake'
 
+  # ---------- alarms: anything that needs a person's attention goes to one SNS topic ----------
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: SolarSabha alerts
+
+  AlertsEmail:
+    Type: AWS::SNS::Subscription
+    Condition: HasAlarmEmail
+    Properties:
+      TopicArn: !Ref AlertsTopic
+      Protocol: email
+      Endpoint: !Ref AlarmEmail
+
+  # The API answers every handled error itself (4xx, 502 when no AI model can answer), so these log metrics pick out
+  # real bugs (an unhandled exception) and failed background reviews from the request log.
+  UnhandledErrorMetric:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref ApiLogs
+      FilterPattern: '"unhandled_error"'
+      MetricTransformations:
+        - {MetricNamespace: SolarSabha, MetricName: UnhandledErrors, MetricValue: "1", DefaultValue: 0}
+
+  ReviewFailedMetric:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref ApiLogs
+      FilterPattern: '"review_job_failed"'
+      MetricTransformations:
+        - {MetricNamespace: SolarSabha, MetricName: ReviewJobFailures, MetricValue: "1", DefaultValue: 0}
+
+  UnhandledErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-unhandled-errors'
+      AlarmDescription: The API hit an unhandled exception (users saw "something went wrong"). Search the API log for unhandled_error.
+      Namespace: SolarSabha
+      MetricName: UnhandledErrors
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+
+  ReviewFailuresAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-review-failures'
+      AlarmDescription: Three or more agent reviews failed within an hour, usually because every AI model is out of quota.
+      Namespace: SolarSabha
+      MetricName: ReviewJobFailures
+      Statistic: Sum
+      Period: 3600
+      EvaluationPeriods: 1
+      Threshold: 3
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+
+  ApiFunctionErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-api-lambda-errors'
+      AlarmDescription: The API Lambda crashed or timed out (including a background review that hit the 540 s limit).
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{Name: FunctionName, Value: !Ref ApiFunction}]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+
+  ApiFunctionThrottlesAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-api-lambda-throttles'
+      AlarmDescription: Lambda refused API requests for lack of concurrency (a traffic spike, or the account limit).
+      Namespace: AWS/Lambda
+      MetricName: Throttles
+      Dimensions: [{Name: FunctionName, Value: !Ref ApiFunction}]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+
+  WakeFunctionErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-wake-lambda-errors'
+      AlarmDescription: The Chaser's scheduled wake-up failed, so a project's follow-up may not have happened.
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions: [{Name: FunctionName, Value: !Ref WakeFunction}]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+
+  Api5xxAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${AWS::StackName}-api-5xx'
+      AlarmDescription: Ten or more server errors in 5 minutes at API Gateway (500s, or 502s when no AI model can answer).
+      Namespace: AWS/ApiGateway
+      MetricName: 5xx
+      Dimensions: [{Name: ApiId, Value: !Ref Api}]
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref AlertsTopic]
+
 Outputs:
+  AlertsTopicArn:
+    Value: !Ref AlertsTopic
   ApiUrl:
     Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com
   TableName:

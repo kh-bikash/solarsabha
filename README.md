@@ -9,6 +9,7 @@ Built for WeMakeDevs × AWS *Environmental Hacks, Bharat Builds Tour 2026*, **Tr
 **Live app: https://solarsabha.d2vnrqt0vyz925.amplifyapp.com** (AWS Amplify, API Gateway, Lambda, DynamoDB, S3, EventBridge Scheduler
 and SSM Parameter Store, Mumbai region; the agents run on Gemini).
 Open the sample society, or start your own and upload the specimen bills from [`backend/samples/pdfs`](backend/samples/pdfs).
+How everything works, end to end: **[Technical guide (PDF)](docs/SolarSabha_Technical_Guide.pdf)**.
 
 ![The SolarSabha office: four agents at work, the committee's desk in front](docs/screenshots/03-office.jpg)
 
@@ -157,7 +158,9 @@ sequenceDiagram
   PL-->>UI: plan, audit, drafts, trace (the office replays it)
 ```
 
-More diagrams (project stages, data model): [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+More diagrams (project stages, data model): [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). The full walkthrough (requests,
+data, agents, models, background jobs, security, configuration, operations, failure modes):
+[docs/SolarSabha_Technical_Guide.pdf](docs/SolarSabha_Technical_Guide.pdf).
 
 ## Trust by design
 
@@ -235,20 +238,25 @@ Every `/projects/{id}` route needs `x-project-key`; routes that change data also
 backend/solarsabha/
   pipeline.py        the whole loop as a pure function (no AWS, no AI)
   project.py         access keys, roles, consent, documents, drafts, clock, audit log
-  reading.py         offline reader for digital PDFs
+  state.py           DynamoDB / local store with versioned saves (optimistic locking)
+  files.py           S3 / local storage for uploaded originals
+  reading.py         offline reader for digital PDFs; cross-check with the AI reader
+  replan.py          DISCOM reply classifier and Plan v2
+  rules.py           rulebook access with state overrides
+  trace.py           tool-call trace and the agents' tool guardrail
   alarm.py           EventBridge alarms for the Chaser
   export.py          Word letters with a society letterhead
   schemas.py         request validation
   tools/             sizing, quotes, fairness, negotiation, timeline, drafts (plain code)
-  agents/            Strands agents: Secretary, Reader, Auditor, Chaser; MCP link
+  agents/            Strands agents: Secretary, Reader, Auditor, Chaser; model chain; MCP link
   handlers/          API and wake-up Lambdas
   data/rulebook.json dated, cited rules with state overrides
 backend/mcp_server/  SolarRules MCP server
 backend/samples/     sample society and specimen PDFs (fictional, watermarked)
 frontend/src/        React app: office/ (scene), pixel/ (sprites), components/ (folders)
 infra/template.yaml  AWS SAM
-scripts/             dev server, evals, sample generator, live smoke test
-docs/                architecture, privacy, rulebook verification, AWS setup, demo script, judge Q&A
+scripts/             dev server, evals, sample generator, live smoke test, technical guide builder
+docs/                technical guide (PDF), architecture, privacy, rulebook verification, AWS setup, demo script, judge Q&A
 ```
 
 ## Honest status
@@ -257,7 +265,8 @@ docs/                architecture, privacy, rulebook verification, AWS setup, de
 |---|---|
 | Projects, uploads, offline reading, plan, audit, letters, approvals, timeline, roles, privacy controls | Working and tested |
 | AWS deployment: Amplify site, API Gateway, Lambdas, DynamoDB, S3, Scheduler alarms | **Live** (link above) and smoke-tested |
-| Live agents: Secretary calling Auditor and Chaser, Reader on PDFs and photos, AI reply reading, polishing | **Live on the deployment** with Gemini (free tier). When the day's free quota is used up, the text agents fall back to BazaarLink, and reading falls back to the plain-rule reader, with a note on screen. Bedrock is supported by one parameter; our new AWS account is not yet allowed to call it |
+| Monitoring | Six CloudWatch alarms (unhandled errors, failed reviews, Lambda errors and throttles, wake-up failures, API 5xx) to an SNS topic; email with `AlarmEmail` |
+| Live agents: Secretary calling Auditor and Chaser, Reader on PDFs and photos, AI reply reading, polishing | **Live on the deployment** with Gemini (free tier). When the day's free quota is used up, reading falls back to the plain-rule reader with a note on screen; the text agents can also fall back to BazaarLink once its key is stored in SSM (off on the deployment today). Bedrock is supported by one parameter; our new AWS account is not yet allowed to call it |
 | Vendor replies, the sample DISCOM reply, the time machine, the vendor list | Simulated or sample data, labelled on screen |
 | State-specific rules | Special-category subsidy loaded; other state rules are added only when verified |
 | Identity | Per-project keys and roles; add Cognito for verified sign-in |
