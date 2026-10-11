@@ -266,18 +266,6 @@ docs/                technical and research guides (PDF), architecture, agents, 
                      AWS setup, demo script, judge Q&A
 ```
 
-## Honest status
-
-| Part | Status |
-|---|---|
-| Projects, uploads, offline reading, plan, audit, letters, approvals, timeline, roles, privacy controls | Working and tested |
-| AWS deployment: Amplify site, API Gateway, Lambdas, DynamoDB, S3, Scheduler alarms | **Live** (link above) and smoke-tested |
-| Monitoring | Six CloudWatch alarms (unhandled errors, failed reviews, Lambda errors and throttles, wake-up failures, API 5xx) to an SNS topic; email with `AlarmEmail` |
-| Live agents: Secretary calling Auditor and Chaser, Reader on PDFs and photos, AI reply reading, polishing | **Live on the deployment** with Gemini (free tier). When the day's free quota is used up, reading falls back to the plain-rule reader with a note on screen; the text agents can also fall back to BazaarLink once its key is stored in SSM (off on the deployment today). Bedrock is supported by one parameter; our new AWS account is not yet allowed to call it |
-| Vendor replies, the sample DISCOM reply, the time machine, the vendor list | Simulated or sample data, labelled on screen |
-| State-specific rules | Special-category subsidy loaded; other state rules are added only when verified |
-| Identity | Per-project keys and roles; add Cognito for verified sign-in |
-
 ## Licence
 
 MIT. Sample society, vendors, DISCOM and documents are fictional.
