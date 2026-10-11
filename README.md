@@ -9,7 +9,8 @@ Built for WeMakeDevs × AWS *Environmental Hacks, Bharat Builds Tour 2026*, **Tr
 **Live app: https://solarsabha.d2vnrqt0vyz925.amplifyapp.com** (AWS Amplify, API Gateway, Lambda, DynamoDB, S3, EventBridge Scheduler
 and SSM Parameter Store, Mumbai region; the agents run on Gemini).
 Open the sample society, or start your own and upload the specimen bills from [`backend/samples/pdfs`](backend/samples/pdfs).
-How everything works, end to end: **[Technical guide (PDF)](docs/SolarSabha_Technical_Guide.pdf)**.
+How everything works, end to end: **[Technical guide (PDF)](docs/SolarSabha_Technical_Guide.pdf)**. The problem, the research
+and how AI agents work, in plain language: **[Research and learning guide (PDF)](docs/SolarSabha_Research_and_Learning_Guide.pdf)**.
 
 ![The SolarSabha office: four agents at work, the committee's desk in front](docs/screenshots/03-office.jpg)
 
@@ -193,12 +194,17 @@ cd frontend && npm install && npm run dev        # http://localhost:5173
 
 **The full app locally (no AWS needed)**: create societies, upload PDFs, edit, approve, download letters.
 ```bash
-python -m venv .venv && .venv/Scripts/activate   # macOS/Linux: source .venv/bin/activate
-make setup                                       # Python and npm dependencies
-make dev-api                                     # API on http://localhost:8787
-VITE_API_URL=http://localhost:8787 make dev-ui   # app on http://localhost:5173
+python -m venv .venv
+.venv\Scripts\Activate.ps1                       # macOS/Linux: source .venv/bin/activate
+pip install -r backend/requirements-dev.txt
+cd frontend && npm install && cd ..
+python scripts/dev_server.py                     # terminal 1: API on http://localhost:8787
+cd frontend && VITE_API_URL=http://localhost:8787 npm run dev   # terminal 2: app on http://localhost:5173
 ```
-Try it with the specimen documents in `backend/samples/pdfs/` (12 bills, 3 quotations).
+On Windows PowerShell, set the variable with `$env:VITE_API_URL="http://localhost:8787"` before `npm run dev`. Step by
+step for Windows and macOS, with troubleshooting: section 2 of the
+[technical guide](docs/SolarSabha_Technical_Guide.pdf). Try it with the specimen documents in `backend/samples/pdfs/`
+(12 bills, 6 quotations).
 
 **With the AI agents**: set `READER_MODE=live` and `GEMINI_API_KEY` in `.env` (optional backup:
 `BAZAARLINK_API_KEY`; or `MODEL_PROVIDER=bedrock` with `BEDROCK_MODEL_ID`; see `.env.example`), then
@@ -256,7 +262,8 @@ backend/samples/     sample society and specimen PDFs (fictional, watermarked)
 frontend/src/        React app: office/ (scene), pixel/ (sprites), components/ (folders)
 infra/template.yaml  AWS SAM
 scripts/             dev server, evals, sample generator, live smoke test, technical guide builder
-docs/                technical guide (PDF), architecture, privacy, rulebook verification, AWS setup, demo script, judge Q&A
+docs/                technical and research guides (PDF), architecture, agents, privacy, rulebook verification,
+                     AWS setup, demo script, judge Q&A
 ```
 
 ## Honest status

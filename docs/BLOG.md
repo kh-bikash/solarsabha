@@ -63,6 +63,6 @@ an encrypted private S3 bucket; EventBridge Scheduler for the Chaser's alarms; G
 
 ## What we would do next
 
-Verified sign-in, state-by-state DISCOM rules, Hindi and other languages, and a pilot with [a real society].
+Verified sign-in, state-by-state DISCOM rules, Hindi and other languages, and a pilot with a real housing society.
 
 Live app: https://solarsabha.d2vnrqt0vyz925.amplifyapp.com · Code: https://github.com/kh-bikash/solarsabha

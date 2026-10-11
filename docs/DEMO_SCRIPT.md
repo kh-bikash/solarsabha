@@ -1,20 +1,44 @@
-# 3-minute video script
+# Demo video: recording script (3 minutes)
 
-Sample data is fictional and labelled on screen ("Sample society", "Simulated", "Offline reader").
+## Before you record
+- **Rehearse offline first, so the AI quota is saved for the real take.** Run the app locally without a Gemini key
+  (technical guide, section 2) and click through the script twice. The screens are the same; only the AI parts differ.
+- **Record the real take on the live site:** https://solarsabha.d2vnrqt0vyz925.amplifyapp.com
+- **Record after 12:30 PM IST.** That is when the free Gemini quota resets, so the AI is most likely to answer.
+- One take uses about 20 AI calls. Click **Ask the agents to review** only once per take.
+- Screen: 1920x1080, Chrome in a fresh **incognito** window, zoom 110%, bookmarks bar hidden, notifications off
+  (Windows: Focus assist on).
+- Recorder: OBS, or Windows **Win + Alt + R**. Use a headset mic; record the voice in a quiet room.
+- Keep `backend/samples/pdfs/bill_2026-09.pdf` ready in a File Explorer window next to the browser.
+- The AI review takes 1 to 3 minutes. **Keep recording and cut the wait out when editing**; the narration never covers it.
 
-| Time | Show | Say |
+## Shot list
+
+| Time | On screen (what to click) | Say |
 |---|---|---|
-| 0:00-0:20 | a real quote from a society secretary (get one, with permission); a terrace | "Solar can cut a society's lift and pump bill, and the government pays part. Most projects die of tiredness, not bad maths." |
-| 0:20-0:45 | Welcome > "Start your society's project"; Documents: drop 12 bills and 3 quotations | "The committee uploads its bills and quotations. Each value is read, shown next to its file, and can be corrected." |
-| 0:45-1:05 | the office playing; the Plan folder; assumptions | "The plan is sized from the society's real use, not the subsidy ceiling. Maths runs in code. Every assumption shows where it came from." |
-| 1:05-1:35 | Quote audit; open a rule citation; the red quote's hidden instruction | "One quotation hides an order to the AI. It is ignored and flagged. The cheapest vendor isn't registered on the National Portal, and the scheme pays only for registered vendors." |
-| 1:35-1:55 | Negotiation room (SIMULATION), Your desk: approve, Word download, notice pinned | "The agent drafts counters and letters. A named committee member approves. Nothing is ever sent by the app." |
-| 1:55-2:30 | time machine +40 days: night, alarm, Chaser escalation; paste the DISCOM reply; Plan v2 | "Agents don't wait for weeks: they save notes and set an alarm. The Chaser wakes, sees the delay, drafts an escalation, and re-plans when the DISCOM limits capacity." |
-| 2:30-2:50 | Settings: members and roles, export, delete; Logbook: who did what | "Each society's data is behind its own access key, with roles, a full activity log, export and delete." |
-| 2:50-3:00 | architecture diagram; the live site URL; "30/30" scoreboard | "Strands agents on Gemini, Lambda, DynamoDB, S3, EventBridge. People approve everything." |
+| **0:00-0:15** | Title card: "SolarSabha: the AI project manager for a society's rooftop solar". Or a terrace photo | "Rooftop solar can cut a housing society's electricity bill for lifts and pumps, and under PM Surya Ghar the government pays eighteen thousand rupees per kilowatt. Yet most society projects never finish. They don't fail on maths. They die of tiredness." |
+| **0:15-0:30** | The live site. Click **Open the sample society**. In **You are** at the top, pick **Meera (sample)**. Let the office play for a few seconds | "SolarSabha is a patient project manager for the committee. Four AI agents work in this office: a Secretary, a Reader, an Auditor and a Chaser. This is a sample society, so the data is fictional." |
+| **0:30-0:50** | Open **Documents**. Drag in `bill_2026-09.pdf`. Wait for it to be read; point at the note on the document | "The committee uploads its electricity bills. The AI Reader reads each one, and plain code checks the AI's numbers. This bill is provisional: the meter wasn't read. So it's flagged for a person to check, not trusted." |
+| **0:50-1:05** | Open **The plan**. Point at the kW, the net cost, the payback and the CO2. Hover one assumption to show its source | "The system is sized from the society's real use: thirty-six kilowatts, eleven and a half lakh rupees after the subsidy, paid back in about three years. Every number comes from tested code, not the AI, and every assumption shows its source." |
+| **1:05-1:25** | Open **Quote audit**. Show the red quote and its flags. Click a rule citation | "Three vendors quoted. One quotation hides an instruction aimed at the AI. It's ignored, and the quote turns red. The cheapest vendor isn't registered on the National Portal, so the subsidy would be refused. Each flag cites its rule." |
+| **1:25-1:50** | Click **Ask the agents to review**. *(cut the wait)* When it's ready, show the office replay, then a vendor question on a quote card, then **Logbook > Agents' review** | "Now the agents review the project. The Secretary asks the Auditor about each quote and the Chaser about the timeline. Every step you see is a real tool call. It ends with one question the committee should ask each vendor." |
+| **1:50-2:05** | Open **Your desk**. Open a letter, click **Approve**, then **Word** | "Letters are drafted for the committee, but nothing is ever sent by the app. A named member approves, downloads it, and sends it themselves. If anyone edits the letter later, the approval is withdrawn." |
+| **2:05-2:30** | Time machine: click **+25 days** (the screen shows *Simulated clock*). Open **Timeline**, show the late stage in red. Open **Your desk**: the Chaser's new letter | "Real projects wait weeks for the electricity company. The agent doesn't sit and wait: it sets an alarm. Here we fast-forward the clock. The Chaser wakes, sees the DISCOM is late, and drafts a follow-up, waiting on the desk." |
+| **2:30-2:45** | Click **A DISCOM reply arrived** > **Use the sample reply** > **Give it to the Chaser**. Show **Plan v2** | "When the DISCOM replies that the transformer can only take a smaller system, the Chaser reads it and the plan is redone at the new size." |
+| **2:45-3:00** | The architecture diagram (README or the technical guide PDF). End on the URL and the GitHub link | "Strands agents on Gemini, running on AWS Lambda, DynamoDB, S3 and EventBridge, live in Mumbai. The AI reads and explains, code does the maths, and people approve everything. SolarSabha." |
+
+## If something goes differently
+- **The bill is read by the plain-rule reader instead of the AI** (the note says so): keep going and say "The free AI
+  quota ran out, so the rule-based reader took over. Nothing else changes."
+- **The agents' review fails:** cut that scene, and retake only that part later (after 12:30 PM IST the next day, or
+  with a paid key).
+- **A click goes wrong:** pause, go back, and redo the scene. Cut between scenes when editing.
 
 ## Say what is simulated
-Vendor replies in the negotiation room, the DISCOM reply in the sample, the clock (time machine), and the vendor list.
-Record Ask the agents to review (the Secretary calling the Auditor and the Chaser, replayed in the office) in the
-1:05-1:35 slot. Record early in the day, when the free Gemini quota is fresh; if the screen shows the plain-rule reader
-took over, say so: "The free AI quota ran out, so the plain-rule reader answered; nothing else changes."
+Say "sample society" at the start, and "we fast-forward the clock" at the time machine. Don't show the Negotiation room
+unless you have time; if you do, say "the vendor replies here are simulated".
+
+## Editing
+- Cut every wait (uploads, the review, page loads). The final video should feel brisk.
+- Add captions for the key numbers: 36 kW, Rs 11.52 lakh, about 3.3 years, about 36 tonnes of CO2 a year.
+- Keep it under 3:00. Export 1080p MP4.
