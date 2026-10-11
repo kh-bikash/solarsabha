@@ -285,7 +285,7 @@ def build():
                  ["This edition", date.today().strftime("%d %B %Y")]], [32 * mm, 138 * mm], header=False),
           Spacer(1, 8 * mm),
           Paragraph("Contents", H2)]
-    toc = ["The big picture", "One request, start to finish", "The data: one record per project",
+    toc = ["The big picture", "Run it on your own computer", "One request, start to finish", "The data: one record per project",
            "The plain-code core: numbers and rules", "Reading documents", "The AI agents",
            "Models, quotas and time limits", "Long-running work: reviews and alarms", "The frontend",
            "Security and privacy", "Configuration reference", "Deploying and operating it", "Testing and quality",
@@ -319,7 +319,75 @@ def build():
     S.append(CondPageBreak(70 * mm))
 
     # 2
-    S += [Paragraph("2. One request, start to finish", H1),
+    S += [Paragraph("2. Run it on your own computer", H1),
+          p("No AWS account is needed. Locally the same backend code runs behind a small Python server, projects are "
+            "saved as JSON files and uploads go to a local folder. Without an AI key the app runs in <b>offline mode</b> "
+            "(the plain-rule reader, no AI); everything else works."),
+          Paragraph("You need", H2),
+          table([["Tool", "Version", "Check with"],
+                 ["Git", "any recent", "git --version"],
+                 ["Python", "3.12 (the version AWS Lambda runs)", "python --version"],
+                 ["Node.js", "20 LTS or newer (includes npm)", "node --version"],
+                 ["Gemini API key (optional)", "free from aistudio.google.com; only for the AI features", "-"]],
+                [44 * mm, 76 * mm, 50 * mm]),
+          Paragraph("One-time setup", H2),
+          p("<b>Windows (PowerShell)</b>"),
+          code("""
+git clone https://github.com/kh-bikash/solarsabha.git
+cd solarsabha
+python -m venv .venv
+.venv\\Scripts\\Activate.ps1          # if blocked: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+pip install -r backend/requirements-dev.txt
+cd frontend; npm install; cd ..
+copy .env.example .env"""),
+          p("<b>macOS / Linux</b>"),
+          code("""
+git clone https://github.com/kh-bikash/solarsabha.git && cd solarsabha
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r backend/requirements-dev.txt
+(cd frontend && npm install)
+cp .env.example .env"""),
+          p("Then open <font face='Courier'>.env</font>. For offline mode leave <font face='Courier'>GEMINI_API_KEY</font> "
+            "empty. For the AI agents, paste <b>your own</b> key after <font face='Courier'>GEMINI_API_KEY=</font> and keep "
+            "<font face='Courier'>READER_MODE=live</font>. Never commit .env (git ignores it) and never share a key in "
+            "chat; each person should use their own."),
+          Paragraph("Every time: two terminals", H2),
+          p("<b>Terminal 1, the backend</b> (from the repo folder, with the virtual environment active):"),
+          code("""
+python scripts/dev_server.py          # prints: API on http://localhost:8787"""),
+          p("<b>Terminal 2, the frontend</b>:"),
+          code("""
+cd frontend
+$env:VITE_API_URL="http://localhost:8787"; npm run dev          # Windows PowerShell
+VITE_API_URL=http://localhost:8787 npm run dev                   # macOS / Linux"""),
+          p("Open <b>http://localhost:5173</b>. Click <i>Open the sample society</i>, or start a new one and upload the "
+            "specimen bills and quotations from <font face='Courier'>backend/samples/pdfs</font>. The header shows the "
+            "mode: <i>Live agents on Gemini</i> or <i>Offline reader, no AI model</i>."),
+          p("<b>Just the look, no backend:</b> run <font face='Courier'>npm run dev</font> in frontend/ without "
+            "VITE_API_URL. It opens a read-only walk through the sample (the header says <i>Static demo</i>)."),
+          Paragraph("Check that everything works", H2),
+          code("""
+cd backend; python -m pytest -q; cd ..     # 87 backend tests
+python scripts/run_evals.py                 # accuracy scoreboard: 30/30
+cd frontend; npm test; cd ..                # 32 frontend tests
+python scripts/smoke_live.py                # only with a Gemini key: one real AI call"""),
+          Paragraph("If something goes wrong", H2),
+          table([["You see", "Do this"],
+                 ["'python' or 'npm' is not recognised", "Install Python 3.12 / Node.js, tick 'Add to PATH', open a new terminal"],
+                 ["Activate.ps1 cannot be loaded", "Run Set-ExecutionPolicy -Scope CurrentUser RemoteSigned once, then activate again"],
+                 ["The header says Static demo", "VITE_API_URL was not set in that terminal; set it and restart npm run dev"],
+                 ["The header says Offline reader, no AI model", "No key in .env, or READER_MODE is not live; fix .env and restart the backend"],
+                 ["Failed to fetch / network error", "The backend is not running in terminal 1, or it stopped with an error"],
+                 ["Address already in use (8787 or 5173)", "Another copy is running; close it (Ctrl+C) or restart the computer"],
+                 ["'every configured AI model ... daily free quota'", "The free Gemini tier is used up for today; wait until tomorrow or use a paid key"],
+                 ["Start over with empty data", "Stop the backend and delete the .state folder in the repo"]],
+                [62 * mm, 108 * mm]),
+          p("Local differences from AWS: data in <font face='Courier'>.state/</font> instead of DynamoDB and S3; the key "
+            "comes from .env instead of SSM; the agents' review runs inside the request; and the Chaser's real alarms are "
+            "off (use the time machine to move the clock).")]
+    S.append(CondPageBreak(70 * mm))
+
+    S += [Paragraph("3. One request, start to finish", H1),
           p("Take <b>PUT /projects/{id}/bills</b> (someone edits a bill). The same path applies to every route."),
           table([["Step", "What happens", "Where"],
                  ["1", "The browser sends JSON with two headers: <b>x-project-key</b> (the project's secret) and "
@@ -333,7 +401,7 @@ def build():
                  ["7", "The body is validated with Pydantic (types, limits; 9 MB maximum)", "schemas.py"],
                  ["8", "The change is applied, logged in the project's activity log, and the whole pipeline is re-run", "project.recompute"],
                  ["9", "The Chaser's alarm is moved to the new due date", "alarm.sync"],
-                 ["10", "The project is saved with a version check (see section 3)", "state.DynamoStore.put"],
+                 ["10", "The project is saved with a version check (see section 4)", "state.DynamoStore.put"],
                  ["11", "The response is the full project, minus the key hash; one JSON log line is written", "handlers/api.py"]],
                 [11 * mm, 117 * mm, 42 * mm]),
           Paragraph("Errors the browser can get", H2),
@@ -358,7 +426,7 @@ POST   .../review           POST .../drafts/{did}/polish  (live AI mode only)"""
     S.append(CondPageBreak(70 * mm))
 
     # 3
-    S += [Paragraph("3. The data: one record per project", H1),
+    S += [Paragraph("4. The data: one record per project", H1),
           p("Each project is a single DynamoDB item: <font face='Courier'>pk = PROJECT#&lt;id&gt;</font>, "
             "<font face='Courier'>sk = STATE</font>. The whole project is stored as one JSON document in the "
             "<font face='Courier'>doc</font> attribute, next to a <font face='Courier'>version</font> number and a "
@@ -397,7 +465,7 @@ POST   .../review           POST .../drafts/{did}/polish  (live AI mode only)"""
     S.append(CondPageBreak(70 * mm))
 
     # 4
-    S += [Paragraph("4. The plain-code core: numbers and rules", H1),
+    S += [Paragraph("5. The plain-code core: numbers and rules", H1),
           p("<font face='Courier'>pipeline.py</font> is the heart of the product: a <b>pure function</b> from inputs "
             "(bills, quotes, events, assumptions, DISCOM reply) to a result (plan, audit, fairness table, timeline, next "
             "action, letters, trace). It uses no AI and no AWS, runs in milliseconds, and is re-run after every change. "
@@ -452,7 +520,7 @@ CO2/year    = kW x 1400 / 1000 x 0.71 tonnes"""),
     S.append(CondPageBreak(70 * mm))
 
     # 5
-    S += [Paragraph("5. Reading documents", H1),
+    S += [Paragraph("6. Reading documents", H1),
           KeepTogether([diagram_upload(), Paragraph("Figure 2. What happens to an uploaded bill or quotation.", CAPTION)]),
           Paragraph("Two readers", H2),
           table([["", "Offline reader (reading.py)", "AI reader (agents/reader.py)"],
@@ -473,7 +541,7 @@ CO2/year    = kW x 1400 / 1000 x 0.71 tonnes"""),
     S.append(CondPageBreak(70 * mm))
 
     # 6
-    S += [Paragraph("6. The AI agents", H1),
+    S += [Paragraph("7. The AI agents", H1),
           p("The agents are built with the <b>Strands Agents SDK</b> (strands-agents 1.58). Each agent is a model plus a "
             "system prompt plus a small set of tools. They read, explain and draft; they never calculate and cannot act "
             "outside the app."),
@@ -512,7 +580,7 @@ CO2/year    = kW x 1400 / 1000 x 0.71 tonnes"""),
     S.append(CondPageBreak(70 * mm))
 
     # 7
-    S += [Paragraph("7. Models, quotas and time limits", H1),
+    S += [Paragraph("8. Models, quotas and time limits", H1),
           p("<b>MODEL_PROVIDER</b> picks the model behind every agent: <b>gemini</b> (default) or <b>bedrock</b>. "
             "Agents, tools, hooks and prompts are identical either way; only factory.model() changes. Free model quotas "
             "are small, and API Gateway gives up after 30 seconds, so calls go through "
@@ -545,7 +613,7 @@ CO2/year    = kW x 1400 / 1000 x 0.71 tonnes"""),
     S.append(CondPageBreak(70 * mm))
 
     # 8
-    S += [Paragraph("8. Long-running work: reviews and alarms", H1),
+    S += [Paragraph("9. Long-running work: reviews and alarms", H1),
           Paragraph("The agents' review runs in the background", H2),
           p("A full review (Secretary, three Auditor calls, Chaser) takes one to three minutes, but API Gateway answers "
             "within 30 seconds. So on AWS the API Lambda starts the review as an <b>asynchronous invocation of itself</b> "
@@ -561,7 +629,7 @@ CO2/year    = kW x 1400 / 1000 x 0.71 tonnes"""),
     S.append(CondPageBreak(70 * mm))
 
     # 9
-    S += [Paragraph("9. The frontend", H1),
+    S += [Paragraph("10. The frontend", H1),
           p("React 18 built with Vite, in <font face='Courier'>frontend/src</font>. No UI framework: hand-made pixel-art "
             "SVG sprites and plain CSS, themed for Track 03."),
           table([["Piece", "What it does"],
@@ -579,7 +647,7 @@ CO2/year    = kW x 1400 / 1000 x 0.71 tonnes"""),
           p("Build for production: <font face='Courier'>VITE_API_URL=&lt;ApiUrl&gt; VITE_PRIVACY_CONTACT=\"...\" npm run "
             "build</font>, then upload <font face='Courier'>dist/</font> to Amplify."),
 
-          Paragraph("10. Security and privacy", H1),
+          Paragraph("11. Security and privacy", H1),
           table([["Concern", "How it is handled"],
                  ["Who can open a project", "Only holders of its link: a random 32-character key; only its SHA-256 hash is "
                                             "stored; compared in constant time"],
@@ -599,7 +667,7 @@ CO2/year    = kW x 1400 / 1000 x 0.71 tonnes"""),
     S.append(CondPageBreak(70 * mm))
 
     # 11
-    S += [Paragraph("11. Configuration reference", H1),
+    S += [Paragraph("12. Configuration reference", H1),
           Paragraph("Environment variables (backend)", H2),
           table([["Variable", "Meaning", "Set by"],
                  ["READER_MODE", "live = AI agents on; anything else = offline reader, no AI", ".env / template"],
@@ -623,7 +691,7 @@ CO2/year    = kW x 1400 / 1000 x 0.71 tonnes"""),
                  ["AlarmEmail", "empty (alarms visible in CloudWatch; no email yet)"]],
                 [50 * mm, 120 * mm]),
 
-          Paragraph("12. Deploying and operating it", H1),
+          Paragraph("13. Deploying and operating it", H1),
           code("""
 # backend (Docker Desktop running; --use-container avoids a Windows-only MCP dependency)
 cd infra
@@ -673,7 +741,7 @@ aws amplify delete-app --app-id d2vnrqt0vyz925 --region ap-south-1"""),
     S.append(CondPageBreak(70 * mm))
 
     # 13
-    S += [Paragraph("13. Testing and quality", H1),
+    S += [Paragraph("14. Testing and quality", H1),
           table([["Check", "Command", "Result"],
                  ["Backend unit and API tests: reader, pipeline, roles, privacy, alarms, wake-up, locking, model fallback, "
                   "guardrails, live agents with fake models", "make test", "87 passing"],
@@ -688,7 +756,7 @@ aws amplify delete-app --app-id d2vnrqt0vyz925 --region ap-south-1"""),
             "<font face='Courier'>backend/samples/pdfs</font> are fictional and watermarked SPECIMEN; they include a "
             "provisional bill, a quote with no price and a quote with a hidden instruction."),
 
-          Paragraph("14. What happens when something fails", H1),
+          Paragraph("15. What happens when something fails", H1),
           table([["Failure", "What the user sees", "Data"],
                  ["Gemini daily quota used up", "Nothing: the next model in the chain answers", "safe"],
                  ["Every model out of quota", "Uploads read by the offline reader with a note; review fails with a clear "
@@ -705,7 +773,7 @@ aws amplify delete-app --app-id d2vnrqt0vyz925 --region ap-south-1"""),
     S.append(CondPageBreak(70 * mm))
 
     # 15
-    S += [Paragraph("15. Limits and next steps", H1),
+    S += [Paragraph("16. Limits and next steps", H1),
           table([["Limit", "Next step"],
                  ["Free Gemini tier: about 20 requests per model per day; content may be used by Google",
                   "A paid key (pennies per review), or Bedrock with the India-only profile once the AWS account allows it"],
@@ -716,7 +784,7 @@ aws amplify delete-app --app-id d2vnrqt0vyz925 --region ap-south-1"""),
                   "lookup; real email threads"],
                  ["Not load-tested", "A short load test before a real launch"]],
                 [80 * mm, 90 * mm]),
-          Paragraph("16. Glossary", H1),
+          Paragraph("17. Glossary", H1),
           table([["Term", "Meaning"],
                  ["PM Surya Ghar", "The national rooftop solar scheme (Muft Bijli Yojana) that pays the subsidy"],
                  ["GHS / RWA", "Group Housing Society / Resident Welfare Association: a society's common facilities"],
